@@ -42,11 +42,12 @@ namespace Assets.Scripts
             {
                 //Create a new player from a prefab
                 GameObject player = PhotonNetwork.Instantiate(this.playerPrefab.name, startingPositions[PhotonNetwork.playerList.Length - 1], Quaternion.identity, 0);
+                player.name = "Pacman_" + PhotonNetwork.playerName;
 
                 //Set player's color
                 player.GetComponent<Renderer>().material.color = colors[PhotonNetwork.playerList.Length - 1];
-
-                Debug.Log("# of Players: " + PhotonNetwork.playerList.Length);
+                
+                
             }
             else
             {
