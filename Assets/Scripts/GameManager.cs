@@ -45,6 +45,8 @@ namespace Assets.Scripts
 
                 //Set player's color
                 player.GetComponent<Renderer>().material.color = colors[PhotonNetwork.playerList.Length - 1];
+
+                Debug.Log("# of Players: " + PhotonNetwork.playerList.Length);
             }
             else
             {
