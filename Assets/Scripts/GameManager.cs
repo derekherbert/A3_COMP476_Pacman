@@ -38,21 +38,20 @@ namespace Assets.Scripts
 
         void Start()
         {
+            //Only instantiate a player if there is no local reference already
             if (PlayerManager.LocalPlayerInstance == null)
             {
                 //Create a new player from a prefab
                 GameObject player = PhotonNetwork.Instantiate(this.playerPrefab.name, startingPositions[PhotonNetwork.playerList.Length - 1], Quaternion.identity, 0);
-                player.name = "Pacman_" + PhotonNetwork.playerName;
+
+                //Set player's GameObject name
+                //player.name = "Pacman_" + PhotonNetwork.playerName;
+                PlayerManager.LocalPlayerInstance.name = "Pacman_" + PhotonNetwork.playerName;
 
                 //Set player's color
-                player.GetComponent<Renderer>().material.color = colors[PhotonNetwork.playerList.Length - 1];
-                
-                
-            }
-            else
-            {
-                Debug.Log("Ignoring scene load for " + Application.loadedLevelName);
-            }
+                //player.GetComponent<Renderer>().material.color = colors[PhotonNetwork.playerList.Length - 1];
+                PlayerManager.LocalPlayerInstance.GetComponent<Renderer>().material.color = colors[PhotonNetwork.playerList.Length - 1];
+            }            
         }
 
         #endregion
