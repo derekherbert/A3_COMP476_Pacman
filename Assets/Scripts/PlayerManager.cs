@@ -15,6 +15,7 @@ namespace Assets.Scripts
 
         [Tooltip("The local player instance. Use this to know if the local player is represented in the Scene")]
         public static GameObject LocalPlayerInstance;
+        public static string playerName;
 
         #endregion
 
@@ -72,7 +73,7 @@ namespace Assets.Scripts
             Debug.Log("RPC CALLLLLLLLLLLLLLLED");
 
             //Set player's GameObject name
-            this.name = "Pacman_" + PhotonNetwork.playerName;
+            this.name = "Pacman_" + PhotonNetwork.player.NickName;
 
             //Set player's color
             this.GetComponent<Renderer>().material.color = GameManager.colors[PhotonNetwork.playerList.Length - 1];

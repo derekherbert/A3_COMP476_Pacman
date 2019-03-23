@@ -13,7 +13,7 @@ namespace Assets.Scripts
     /// Player name input field. Let the user input his name, will appear above the player in the game.
     /// </summary>
     [RequireComponent(typeof(InputField))]
-    public class PlayerNameInputField : MonoBehaviour
+    public class PlayerNameInputField : Photon.PunBehaviour
     {
         #region Private Variables
 
