@@ -14,7 +14,7 @@ namespace Assets.Scripts
 
         [Tooltip("The prefab to use for representing the player")]
         public GameObject playerPrefab;
-        public int numberOfPlayers = 0;
+        public static int numberOfPlayers = 0;
         public Vector3[] startingPositions = { new Vector3(-9.5f, 0.5f, 10.5f), //Top-left corner
                                                new Vector3(10.5f, 0.5f, -9.5f), //Bottom-right corner
                                                new Vector3(10.5f, 0.5f, 10.5f), //Top-right corner
