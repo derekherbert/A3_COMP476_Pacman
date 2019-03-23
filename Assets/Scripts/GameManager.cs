@@ -14,6 +14,12 @@ namespace Assets.Scripts
 
         [Tooltip("The prefab to use for representing the player")]
         public GameObject playerPrefab;
+        public int numberOfPlayers = 0;
+        public Vector3[] startingPositions = { new Vector3(0f, 0.5f, 0f),
+                                               new Vector3(5f, 0.5f, 5f),
+                                               new Vector3(-5f, 0.5f, 5f),
+                                               new Vector3(-5f, 0.5f, -5f)
+                                             };
 
         #endregion
 
@@ -28,10 +34,11 @@ namespace Assets.Scripts
         void Start()
         {
             if (PlayerManager.LocalPlayerInstance == null)
-            {
+            {    
                 Debug.Log("We are Instantiating LocalPlayer from " + Application.loadedLevelName);
                 // we're in a room. spawn a character for the local player. it gets synced by using PhotonNetwork.Instantiate
-                PhotonNetwork.Instantiate(this.playerPrefab.name, new Vector3(0f, 5f, 0f), Quaternion.identity, 0);
+                PhotonNetwork.Instantiate(this.playerPrefab.name, startingPositions[numberOfPlayers], Quaternion.identity, 0);
+                numberOfPlayers++;
             }
             else
             {
@@ -49,6 +56,7 @@ namespace Assets.Scripts
         /// </summary>
         public override void OnLeftRoom()
         {
+            numberOfPlayers--;
             SceneManager.LoadScene(0);
         }
 
