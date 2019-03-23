@@ -13,6 +13,9 @@ namespace Assets.Scripts
         public float speed = 10.0f;
         public float rotationSpeed = 100.0f;
 
+        [Tooltip("The local player instance. Use this to know if the local player is represented in the Scene")]
+        public static GameObject LocalPlayerInstance;
+
         #endregion
 
         #region Private Variables
@@ -37,6 +40,16 @@ namespace Assets.Scripts
                 Beams.SetActive(false);
             }*/
 
+
+            // #Important
+            // used in GameManager.cs: we keep track of the localPlayer instance to prevent instantiation when levels are synchronized
+            if (photonView.isMine)
+            {
+                PlayerManager.LocalPlayerInstance = this.gameObject;
+            }
+            // #Critical
+            // we flag as don't destroy on load so that instance survives level synchronization, thus giving a seamless experience when levels load.
+            DontDestroyOnLoad(this.gameObject);
         }
 
         /// <summary>
