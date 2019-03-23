@@ -58,7 +58,11 @@ namespace Assets.Scripts
         /// </summary>
         void Update()
         {
-            ProcessInputs();
+            if (photonView.isMine)
+            {
+                ProcessInputs();
+            }
+            
 
             // trigger Beams active state
             /*if (Beams != null && IsFiring != Beams.GetActive())
@@ -73,7 +77,7 @@ namespace Assets.Scripts
             Debug.Log("RPC CALLLLLLLLLLLLLLLED");
 
             //Set player's GameObject name
-            this.name = "Pacman_" + PhotonNetwork.player.NickName;
+            photonView.name = "Pacman_" + PhotonNetwork.player.NickName;
 
             //Set player's color
             this.GetComponent<Renderer>().material.color = GameManager.colors[PhotonNetwork.playerList.Length - 1];
