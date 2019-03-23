@@ -8,18 +8,23 @@ using UnityEngine.SceneManagement;
 
 namespace Assets.Scripts
 {
-    public class GameManager : Photon.PunBehaviour, IPunObservable
+    public class GameManager : Photon.PunBehaviour
     {
         #region Public Variables
 
         [Tooltip("The prefab to use for representing the player")]
         public GameObject playerPrefab;
-        public static int numberOfPlayers = 0;
         public Vector3[] startingPositions = { new Vector3(-9.5f, 0.5f, 10.5f), //Top-left corner
                                                new Vector3(10.5f, 0.5f, -9.5f), //Bottom-right corner
                                                new Vector3(10.5f, 0.5f, 10.5f), //Top-right corner
                                                new Vector3(-9.5f, 0.5f, -9.5f)  //Bottom-left corner
                                              };
+
+        public Color[] colors = { Color.yellow,
+                                    Color.green,
+                                    Color.blue,
+                                    Color.red
+                                  };
 
         #endregion
 
@@ -34,11 +39,12 @@ namespace Assets.Scripts
         void Start()
         {
             if (PlayerManager.LocalPlayerInstance == null)
-            {    
-                Debug.Log("We are Instantiating LocalPlayer from " + Application.loadedLevelName);
-                // we're in a room. spawn a character for the local player. it gets synced by using PhotonNetwork.Instantiate
-                PhotonNetwork.Instantiate(this.playerPrefab.name, startingPositions[numberOfPlayers], Quaternion.identity, 0);
-                numberOfPlayers++;
+            {
+                //Create a new player from a prefab
+                GameObject player = PhotonNetwork.Instantiate(this.playerPrefab.name, startingPositions[PhotonNetwork.playerList.Length - 1], Quaternion.identity, 0);
+
+                //Set player's color
+                player.GetComponent<Renderer>().material.color = colors[PhotonNetwork.playerList.Length - 1];
             }
             else
             {
@@ -56,7 +62,6 @@ namespace Assets.Scripts
         /// </summary>
         public override void OnLeftRoom()
         {
-            numberOfPlayers--;
             SceneManager.LoadScene(0);
         }
 
@@ -115,21 +120,6 @@ namespace Assets.Scripts
             Debug.Log("PhotonNetwork : Loading Level : Room");
             PhotonNetwork.LoadLevel("Room");
         }
-
-        public void OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)
-        {
-            if (stream.isWriting)
-            {
-                // We own this player: send the others our data
-                stream.SendNext(numberOfPlayers);
-            }
-            else
-            {
-                // Network player, receive data
-                numberOfPlayers = (int)stream.ReceiveNext();
-            }
-        }
-
 
         #endregion
     }
