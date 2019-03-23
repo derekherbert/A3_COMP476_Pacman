@@ -8,7 +8,7 @@ using UnityEngine.SceneManagement;
 
 namespace Assets.Scripts
 {
-    public class GameManager : Photon.PunBehaviour
+    public class GameManager : Photon.PunBehaviour, IPunObservable
     {
         #region Public Variables
 
@@ -114,6 +114,20 @@ namespace Assets.Scripts
             }
             Debug.Log("PhotonNetwork : Loading Level : Room");
             PhotonNetwork.LoadLevel("Room");
+        }
+
+        public void OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)
+        {
+            if (stream.isWriting)
+            {
+                // We own this player: send the others our data
+                stream.SendNext(numberOfPlayers);
+            }
+            else
+            {
+                // Network player, receive data
+                numberOfPlayers = (int)stream.ReceiveNext();
+            }
         }
 
 
