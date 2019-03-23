@@ -14,13 +14,13 @@ namespace Assets.Scripts
 
         [Tooltip("The prefab to use for representing the player")]
         public GameObject playerPrefab;
-        public Vector3[] startingPositions = { new Vector3(-9.5f, 0.5f, 10.5f), //Top-left corner
+        public static Vector3[] startingPositions = { new Vector3(-9.5f, 0.5f, 10.5f), //Top-left corner
                                                new Vector3(10.5f, 0.5f, -9.5f), //Bottom-right corner
                                                new Vector3(10.5f, 0.5f, 10.5f), //Top-right corner
                                                new Vector3(-9.5f, 0.5f, -9.5f)  //Bottom-left corner
                                              };
 
-        public Color[] colors = { Color.yellow,
+        public static Color[] colors = { Color.yellow,
                                     Color.green,
                                     Color.blue,
                                     Color.red
@@ -43,14 +43,10 @@ namespace Assets.Scripts
             {
                 //Create a new player from a prefab
                 PhotonView player = PhotonNetwork.Instantiate(this.playerPrefab.name, startingPositions[PhotonNetwork.playerList.Length - 1], Quaternion.identity, 0).GetComponent<PhotonView>();
-
-                //Set player's GameObject name
-                player.name = "Pacman_" + PhotonNetwork.playerName;
-
-                //Set player's color
-                player.GetComponent<Renderer>().material.color = colors[PhotonNetwork.playerList.Length - 1];
+                
+                PhotonView.Get(player).RPC("NewPlayerSpawn", PhotonTargets.All);
             }        
-        }
+        }               
 
         #endregion
 

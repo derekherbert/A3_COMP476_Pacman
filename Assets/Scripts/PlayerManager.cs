@@ -66,6 +66,18 @@ namespace Assets.Scripts
             }*/
         }
 
+        [PunRPC]
+        void NewPlayerSpawn(PhotonMessageInfo info)
+        {
+            Debug.Log("RPC CALLLLLLLLLLLLLLLED");
+
+            //Set player's GameObject name
+            this.name = "Pacman_" + PhotonNetwork.playerName;
+
+            //Set player's color
+            this.GetComponent<Renderer>().material.color = GameManager.colors[PhotonNetwork.playerList.Length - 1];
+        }
+
         /// <summary>
         /// MonoBehaviour method called when the Collider 'other' enters the trigger.
         /// If it is another player, both should bounce back
