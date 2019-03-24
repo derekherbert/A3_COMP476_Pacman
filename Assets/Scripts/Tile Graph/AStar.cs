@@ -130,7 +130,7 @@ public class AStar
         //If the childItem has the highest estimatedTotalCost, add it at the end
         openList.Add(childItem);
     }
-
+    
     private float getEstimatedCostSoFar(Node currentNode, Node endNode, Heuristic heuristic)
     {
         if (heuristic == Heuristic.EUCLIDIAN)
@@ -138,7 +138,7 @@ public class AStar
             return Vector3.Distance(currentNode.GameObject.transform.position, endNode.GameObject.transform.position);
         }
 
-        return 0f;
+        return 1f;
     }
 
     //Check if the search algorithm is ready to terminate. 

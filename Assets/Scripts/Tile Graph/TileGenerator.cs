@@ -10,7 +10,6 @@ public class TileGenerator : Photon.PunBehaviour
     float sampleNodeY;
     float sampleNodeZ;
     public static Graph Graph;
-    private static bool firstUpdate = true;
 
     void Start()
     {        
@@ -23,7 +22,7 @@ public class TileGenerator : Photon.PunBehaviour
         {
             //Create empty GameObject in the scene
             GameObject node = GameObject.Instantiate(sampleNode);
-            node.transform.position = new Vector3(floor.transform.position.x, 0.5f, floor.transform.position.z);
+            node.transform.position = new Vector3(floor.transform.position.x, 5f, floor.transform.position.z);
             node.name = "Node_" + Graph.Nodes.Count;
             node.GetComponent<SphereCollider>().enabled = true;
 
@@ -34,7 +33,7 @@ public class TileGenerator : Photon.PunBehaviour
 
     void Update()
     {
-        if (firstUpdate)
+        if (Graph.Connections.Count == 0)
         {
             //Create connections in Graph
             foreach (Node node in Graph.Nodes)
@@ -54,9 +53,7 @@ public class TileGenerator : Photon.PunBehaviour
             Debug.Log("Nodes.Count: " + Graph.Nodes.Count);
 
             //Testing
-            showPath();                
-
-            firstUpdate = false;
+            showPath();           
         }
     }
 
@@ -64,13 +61,13 @@ public class TileGenerator : Photon.PunBehaviour
     private void showPath()
     {
         AStar aStar = new AStar();
-        List<Connection> path = aStar.GetPath(Graph.Nodes[0], Graph.Nodes[90], Heuristic.EUCLIDIAN);
+        List<Connection> path = aStar.GetPath(Graph.Nodes[0], Graph.Nodes[100], Heuristic.EUCLIDIAN);
         //List<Connection> path = aStar.GetPath(new Vector3(-6f, 0f, 8f), new Vector3(8f, 0f, 2f), Heuristic.EUCLIDIAN);
 
         foreach (Connection connection in path)
         {
-            connection.ToNode.GameObject.GetComponent<Renderer>().material.color = Color.red;
-            connection.FromNode.GameObject.GetComponent<Renderer>().material.color = Color.red;
+            //connection.ToNode.GameObject.GetComponent<Renderer>().material.color = Color.red;
+            //connection.FromNode.GameObject.GetComponent<Renderer>().material.color = Color.red;
         }
     }          
 

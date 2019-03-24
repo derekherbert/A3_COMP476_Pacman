@@ -2,5 +2,6 @@
 
 public enum Heuristic
 {
-	EUCLIDIAN
+	EUCLIDIAN,
+    DIJKSTRA
 };

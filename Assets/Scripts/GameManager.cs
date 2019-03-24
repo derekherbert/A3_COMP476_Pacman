@@ -20,6 +20,12 @@ namespace Assets.Scripts
                                                new Vector3(-9.5f, 0.5f, -9.5f)  //Bottom-left corner
                                              };
 
+        public static Vector3[] startingRotations = { new Vector3(0f, 180f, 0f), //Top-left corner
+                                               new Vector3(0f, 0f, 0f), //Bottom-right corner
+                                               new Vector3(0f, 180f, 0f), //Top-right corner
+                                               new Vector3(0f, 0f, 0f)  //Bottom-left corner
+                                             };
+
         public static Color[] colors = { Color.yellow,
                                     Color.green,
                                     Color.blue,
@@ -42,10 +48,12 @@ namespace Assets.Scripts
             if (PlayerManager.LocalPlayerInstance == null)
             {
                 //Create a new player from a prefab
-                GameObject player = PhotonNetwork.Instantiate(this.playerPrefab.name, startingPositions[PhotonNetwork.playerList.Length - 1], Quaternion.identity, 0);
+                GameObject player = PhotonNetwork.Instantiate(this.playerPrefab.name, startingPositions[PhotonNetwork.playerList.Length - 1], Quaternion.Euler(startingRotations[PhotonNetwork.playerList.Length - 1]), 0);
                 player.name = "Pacman_" + PhotonNetwork.player.NickName;
 
-                PhotonView.Get(this).RPC("NewPlayerSpawn", PhotonTargets.All);
+                Debug.Log("PhotonView = " + GetComponent<PhotonView>());
+
+                this.GetComponent<PhotonView>().RPC("NewPlayerSpawn", PhotonTargets.All);
             }
         }        
         
