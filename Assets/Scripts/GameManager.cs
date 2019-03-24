@@ -42,12 +42,13 @@ namespace Assets.Scripts
             if (PlayerManager.LocalPlayerInstance == null)
             {
                 //Create a new player from a prefab
-                PhotonNetwork.Instantiate(this.playerPrefab.name, startingPositions[PhotonNetwork.playerList.Length - 1], Quaternion.identity, 0);
-                
-                PhotonView.Get(this).RPC("NewPlayerSpawn", PhotonTargets.All);
-            }        
-        }               
+                GameObject player = PhotonNetwork.Instantiate(this.playerPrefab.name, startingPositions[PhotonNetwork.playerList.Length - 1], Quaternion.identity, 0);
+                player.name = "Pacman_" + PhotonNetwork.player.NickName;
 
+                PhotonView.Get(this).RPC("NewPlayerSpawn", PhotonTargets.All);
+            }
+        }        
+        
         #endregion
 
         #region Photon Messages

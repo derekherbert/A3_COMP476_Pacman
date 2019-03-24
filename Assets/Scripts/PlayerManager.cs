@@ -63,7 +63,7 @@ namespace Assets.Scripts
         void NewPlayerSpawn(PhotonMessageInfo info)
         { 
             //Set player's GameObject name
-            photonView.name = "Pacman_" + PhotonNetwork.player.NickName;
+            this.gameObject.name = "Pacman_" + PhotonNetwork.player.NickName;
 
             //Set player's color
             this.GetComponent<Renderer>().material.color = GameManager.colors[PhotonNetwork.playerList.Length - 1];
@@ -75,7 +75,7 @@ namespace Assets.Scripts
         /// </summary>
         void OnTriggerEnter(Collider other)
         {
-            Debug.Log("Ahoy");
+            //Debug.Log("Ahoy");
 
             //Only care about local player
             if (!photonView.isMine)
