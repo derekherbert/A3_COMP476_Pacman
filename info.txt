@@ -1,3 +1,17 @@
 appid:021ee210-ff14-422c-99f3-029b8cc2a357
 
 Current step: https://doc.photonengine.com/en-us/pun/v1/demos-and-tutorials/pun-basics-tutorial/player-prefab
+
+
+
+- Raycast isn't hitting the nodes for some reason => Astar fails because only 14 connections are found...
+	- Maybe there is some logic here specific to the project
+	- Maybe its intersecting with the floor's collider
+		- raise the spheres slightly off the ground
+
+- Make movement work with astar (along nodes)
+	- Record the last move a player made (w, a, s, d) and use that as the next direction 
+
+	- Continuously raycast in transform.forward
+		- If node, AStar to that node
+		- If wall, AStar to node in direction of player's last move

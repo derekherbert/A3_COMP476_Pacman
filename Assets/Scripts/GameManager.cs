@@ -42,9 +42,9 @@ namespace Assets.Scripts
             if (PlayerManager.LocalPlayerInstance == null)
             {
                 //Create a new player from a prefab
-                PhotonView player = PhotonNetwork.Instantiate(this.playerPrefab.name, startingPositions[PhotonNetwork.playerList.Length - 1], Quaternion.identity, 0).GetComponent<PhotonView>();
+                PhotonNetwork.Instantiate(this.playerPrefab.name, startingPositions[PhotonNetwork.playerList.Length - 1], Quaternion.identity, 0);
                 
-                PhotonView.Get(player).RPC("NewPlayerSpawn", PhotonTargets.All);
+                PhotonView.Get(this).RPC("NewPlayerSpawn", PhotonTargets.All);
             }        
         }               
 

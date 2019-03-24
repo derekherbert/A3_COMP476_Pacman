@@ -10,7 +10,7 @@ namespace Assets.Scripts
 
         public int score;
         public Vector3 startingPosition;
-        public float speed = 10.0f;
+        public float speed = 0.00000000001f;
         public float rotationSpeed = 100.0f;
 
         [Tooltip("The local player instance. Use this to know if the local player is represented in the Scene")]
@@ -31,17 +31,7 @@ namespace Assets.Scripts
         /// MonoBehaviour method called on GameObject by Unity during early initialization phase.
         /// </summary>
         void Awake()
-        {
-            /*if (Beams == null)
-            {
-                Debug.LogError("<Color=Red><a>Missing</a></Color> Beams Reference.", this);
-            }
-            else
-            {
-                Beams.SetActive(false);
-            }*/
-
-
+        {            
             // #Important
             // used in GameManager.cs: we keep track of the localPlayer instance to prevent instantiation when levels are synchronized
             if (photonView.isMine)
@@ -53,6 +43,11 @@ namespace Assets.Scripts
             DontDestroyOnLoad(this.gameObject);
         }
 
+        void Start()
+        {
+            LocalPlayerInstance.GetComponent<SphereCollider>().isTrigger = true;
+        }
+
         /// <summary>
         /// MonoBehaviour method called on GameObject by Unity on every frame.
         /// </summary>
@@ -62,20 +57,11 @@ namespace Assets.Scripts
             {
                 ProcessInputs();
             }
-            
-
-            // trigger Beams active state
-            /*if (Beams != null && IsFiring != Beams.GetActive())
-            {
-                Beams.SetActive(IsFiring);
-            }*/
         }
 
         [PunRPC]
         void NewPlayerSpawn(PhotonMessageInfo info)
-        {
-            Debug.Log("RPC CALLLLLLLLLLLLLLLED");
-
+        { 
             //Set player's GameObject name
             photonView.name = "Pacman_" + PhotonNetwork.player.NickName;
 
@@ -89,6 +75,8 @@ namespace Assets.Scripts
         /// </summary>
         void OnTriggerEnter(Collider other)
         {
+            Debug.Log("Ahoy");
+
             //Only care about local player
             if (!photonView.isMine)
             {
@@ -98,7 +86,7 @@ namespace Assets.Scripts
             //Pacman collision: Both players bounce back and rotate towards where they were coming from
             else if (other.name.Contains("Pacman"))
             {
-
+                Debug.Log("OYYYYYYYY");
             }
 
             //Ghost collision: Player's position is reset to starting point. Score is decreased.
@@ -106,7 +94,7 @@ namespace Assets.Scripts
             {
 
             }
-            
+
         }
         
         #endregion
@@ -122,10 +110,14 @@ namespace Assets.Scripts
             float rotation = Input.GetAxis("Horizontal") * rotationSpeed * Time.deltaTime;           
 
             // Move translation along the object's z-axis
-            transform.Translate(0, 0, translation);
+            //transform.Translate(0, 0, translation);
 
             // Rotate around our y-axis
             transform.Rotate(0, rotation, 0);
+
+            this.GetComponent<Rigidbody>().MovePosition(transform.position);
+
+
         }
 
         public void OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)
