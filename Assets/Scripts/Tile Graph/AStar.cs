@@ -14,17 +14,17 @@ public class AStar
     }
 
     //TO DO
-    public List<Connection> GetPath(Vector3 startPosition, Vector3 endPosition, Heuristic heuristic)
+    public List<Node> GetPath(Vector3 startPosition, Vector3 endPosition, Heuristic heuristic)
     {
         return GetPath(findClosestNode(startPosition), findClosestNode(endPosition), heuristic);
     }
 
-    public List<Connection> GetPath(Node startNode, Node endNode, Heuristic heuristic)
+    public List<Node> GetPath(Node startNode, Node endNode, Heuristic heuristic)
     {
         //Create the first entry in the openList
-        openList.Add(new OpenListItem(startNode, 0.0f, new List<Connection>(), getEstimatedCostSoFar(startNode, endNode, heuristic)));
+        openList.Add(new OpenListItem(startNode, 0.0f, new List<Node>(), getEstimatedCostSoFar(startNode, endNode, heuristic)));
         OpenListItem currentItem, childItem;
-        List<Connection> childItemConnections;
+        List<Node> childItemConnections;
         bool addToClosedList = true;
         bool childItemUpdated = false;
 
@@ -38,42 +38,40 @@ public class AStar
             //Add all children to the openList ordered by increasing estimatedTotalCost
             foreach (Connection childConnection in TileGenerator.Graph.getConnectedNodes(currentItem.Node))
             {
-                //Add the parent's connection items to the child
-                childItemConnections = new List<Connection>();
+                if (!currentItem.ConnectionNodes.Contains(childConnection.ToNode))
+                { 
+                    //Add the parent's connection chain to the child
+                    childItemConnections = new List<Node>(currentItem.ConnectionNodes);
 
-                foreach (Connection connection in currentItem.Connections)
-                {
-                    childItemConnections.Add(connection);
-                }
+                    //Add the connection from the parent to the child
+                    childItemConnections.Add(childConnection.ToNode);
 
-                //Add the connection from the parent to the child
-                childItemConnections.Add(childConnection);
+                    //Create an OpenListItem for the child
+                    childItem = new OpenListItem(childConnection.ToNode, currentItem.CostSoFar + childConnection.Cost, childItemConnections, getEstimatedCostSoFar(childConnection.ToNode, endNode, heuristic));
 
-                //Create an OpenListItem for the child
-                childItem = new OpenListItem(childConnection.ToNode, currentItem.CostSoFar + childConnection.Cost, childItemConnections, getEstimatedCostSoFar(childConnection.ToNode, endNode, heuristic));
-
-                //Check if the childItem's node already exists in the openList
-                for (int i = 0; i < openList.Count; i++)
-                {
-                    //Check if both items have the same nodes 
-                    if (childItem.Node.Index == openList[i].Node.Index)
+                    //Check if the childItem's node already exists in the openList
+                    for (int i = 0; i < openList.Count; i++)
                     {
-                        // Keep the more optimal path
-                        if (childItem.CostSoFar < openList[i].CostSoFar)
+                        //Check if both items have the same nodes 
+                        if (childItem.Node.Index == openList[i].Node.Index)
                         {
-                            openList[i] = childItem;
-                            childItemUpdated = true;
-                            break;
+                            // Keep the more optimal path
+                            if (childItem.CostSoFar < openList[i].CostSoFar)
+                            {
+                                openList[i] = childItem;
+                                childItemUpdated = true;
+                                break;
+                            }
                         }
                     }
-                }
 
-                if (!childItemUpdated)
-                {
-                    insertIntoOpenList(openList, childItem);
+                    if (!childItemUpdated)
+                    {
+                        insertIntoOpenList(openList, childItem);
+                    }
+
+                    childItemUpdated = false; //Reset flag
                 }
-                
-                childItemUpdated = false; //Reset flag
             }
 
             //Check if it exists on the closed list 
@@ -84,11 +82,10 @@ public class AStar
                 {
                     // Keep the more optimal path
                     if (currentItem.CostSoFar < closedList[i].CostSoFar)
-                    {
-                        //Remove childItem from the closedList and put it back into the openList
-                        closedList.RemoveAt(i);
-                        insertIntoOpenList(openList, currentItem);
+                    {                                                
+                        closedList[i] = new ClosedListItem(currentItem.Node, currentItem.CostSoFar, currentItem.ConnectionNodes);
                         addToClosedList = false;
+                        break;
                     }
                 }
             }
@@ -96,7 +93,7 @@ public class AStar
             if (addToClosedList)
             {
                 //Add currentItem to the closedList
-                closedList.Add(new ClosedListItem(currentItem.Node, currentItem.CostSoFar, currentItem.Connections));
+                closedList.Add(new ClosedListItem(currentItem.Node, currentItem.CostSoFar, currentItem.ConnectionNodes));
             }
 
             addToClosedList = true; //Reset flag
@@ -107,7 +104,7 @@ public class AStar
         {
             if (item.Node.Index == endNode.Index)
             {
-                return item.Connections;
+                return item.ConnectionNodes;
             }
         }
 
@@ -144,6 +141,8 @@ public class AStar
     //Check if the search algorithm is ready to terminate. 
     private bool terminateSearch(Node endNode)
     {
+        Console.WriteLine("openList.Count = " + openList.Count);
+
         if (openList.Count != 0)
         {
             ClosedListItem goal = null;
@@ -162,9 +161,11 @@ public class AStar
             {
                 return true;
             }
+
+            return false;
         }
 
-        return false;    
+        return true;    
     }
 
     private Node findClosestNode(Vector3 position)

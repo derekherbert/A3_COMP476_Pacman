@@ -10,6 +10,7 @@ public class TileGenerator : Photon.PunBehaviour
     float sampleNodeY;
     float sampleNodeZ;
     public static Graph Graph;
+    bool runTest = true;
 
     void Start()
     {        
@@ -22,7 +23,7 @@ public class TileGenerator : Photon.PunBehaviour
         {
             //Create empty GameObject in the scene
             GameObject node = GameObject.Instantiate(sampleNode);
-            node.transform.position = new Vector3(floor.transform.position.x, 5f, floor.transform.position.z);
+            node.transform.position = new Vector3(floor.transform.position.x, 1f, floor.transform.position.z);
             node.name = "Node_" + Graph.Nodes.Count;
             node.GetComponent<SphereCollider>().enabled = true;
 
@@ -50,10 +51,14 @@ public class TileGenerator : Photon.PunBehaviour
             }
 
             Debug.Log("Connections.Count: " + Graph.Connections.Count);
-            Debug.Log("Nodes.Count: " + Graph.Nodes.Count);
+            Debug.Log("Nodes.Count: " + Graph.Nodes.Count);                       
+        }
 
-            //Testing
-            showPath();           
+        //Testing
+        if (Graph.Connections.Count == 928 && runTest)
+        {
+            showPath();
+            runTest = false;
         }
     }
 
@@ -61,20 +66,22 @@ public class TileGenerator : Photon.PunBehaviour
     private void showPath()
     {
         AStar aStar = new AStar();
-        List<Connection> path = aStar.GetPath(Graph.Nodes[0], Graph.Nodes[100], Heuristic.EUCLIDIAN);
+        List<Node> path = aStar.GetPath(Graph.Nodes[0], Graph.Nodes[215], Heuristic.EUCLIDIAN);
         //List<Connection> path = aStar.GetPath(new Vector3(-6f, 0f, 8f), new Vector3(8f, 0f, 2f), Heuristic.EUCLIDIAN);
-
-        foreach (Connection connection in path)
+        
+        foreach (Node node in path)
         {
-            //connection.ToNode.GameObject.GetComponent<Renderer>().material.color = Color.red;
-            //connection.FromNode.GameObject.GetComponent<Renderer>().material.color = Color.red;
+            node.GameObject.GetComponent<Renderer>().material.color = Color.red;
+            node.GameObject.GetComponent<Renderer>().material.color = Color.red;
         }
     }          
 
     //Sends out a raycast in a specific direction. If another node is hit, a connection is added to the Graph.
     private void addConnection(Node node, Vector3 direction)
     {
-        RaycastHit hit;                
+        RaycastHit hit;
+
+        Debug.DrawRay(node.GameObject.transform.position, direction.normalized, Color.white, 5000f);
 
         if (Physics.Raycast(node.GameObject.transform.position, direction.normalized, out hit, 1.2f))
         {

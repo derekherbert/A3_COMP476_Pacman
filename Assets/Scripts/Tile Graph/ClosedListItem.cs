@@ -3,11 +3,11 @@ using System.Collections.Generic;
 
 public class ClosedListItem
 {
-	public ClosedListItem(Node node, float costSoFar, List<Connection> connections)
+	public ClosedListItem(Node node, float costSoFar, List<Node> connectionNodes)
 	{
         Node = node;
         CostSoFar = costSoFar;
-        Connections = connections;
+        ConnectionNodes = connectionNodes;
 	}
 
     public Node Node
@@ -22,7 +22,7 @@ public class ClosedListItem
         set;
     }
 
-    public List<Connection> Connections
+    public List<Node> ConnectionNodes
     {
         get;
         set;

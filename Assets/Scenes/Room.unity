@@ -36653,7 +36653,7 @@ GameObject:
   - component: {fileID: 1015170832}
   - component: {fileID: 1015170831}
   m_Layer: 0
-  m_Name: SampleNode
+  m_Name: SampleNode (empty)
   m_TagString: Node
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -72079,7 +72079,7 @@ GameObject:
   - component: {fileID: 1927788333}
   - component: {fileID: 1927788332}
   m_Layer: 0
-  m_Name: SampleNode (sphere)
+  m_Name: SampleNode
   m_TagString: Node
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

@@ -3,11 +3,11 @@ using System.Collections.Generic;
 
 public class OpenListItem
 {
-    public OpenListItem(Node node, float costSoFar, List<Connection> connections, float estimatedTotalCost)
+    public OpenListItem(Node node, float costSoFar, List<Node> connectionNodes, float estimatedTotalCost)
     {
         Node = node;
         CostSoFar = costSoFar;
-        Connections = connections;
+        ConnectionNodes = connectionNodes;
         EstimatedTotalCost = estimatedTotalCost;
     }
 
@@ -23,7 +23,7 @@ public class OpenListItem
         set;
     }
 
-    public List<Connection> Connections
+    public List<Node> ConnectionNodes
     {
         get;
         set;
