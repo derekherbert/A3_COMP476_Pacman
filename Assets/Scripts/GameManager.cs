@@ -110,6 +110,20 @@ namespace Assets.Scripts
             PhotonNetwork.LeaveRoom();
         }
 
+        public static void addPellets()
+        {
+            GameObject samplePellet = GameObject.Find("SamplePellet");
+            GameObject parent = GameObject.Find("Pellets");
+            int index = 0;
+
+            foreach (GameObject floorTile in GameObject.FindGameObjectsWithTag("Floor"))
+            {
+                GameObject pellet = PhotonNetwork.Instantiate("Pellet", new Vector3(floorTile.transform.position.x, 0.5f, floorTile.transform.position.z), Quaternion.identity, 0);
+                pellet.name = "Pellet_" + index;
+                pellet.transform.parent = parent.transform;
+                index++;
+            }
+        }
 
         #endregion
 

@@ -2,6 +2,7 @@
 using UnityEngine;
 using System.Collections.Generic;
 using UnityEditor;
+using Assets.Scripts;
 
 public class TileGenerator : Photon.PunBehaviour
 {
@@ -51,7 +52,11 @@ public class TileGenerator : Photon.PunBehaviour
             }
 
             Debug.Log("Connections.Count: " + Graph.Connections.Count);
-            Debug.Log("Nodes.Count: " + Graph.Nodes.Count);                       
+            Debug.Log("Nodes.Count: " + Graph.Nodes.Count);
+
+
+            //Add pellets
+            GameManager.addPellets();
         }
 
         //Testing

@@ -44,4 +44,5 @@ MonoBehaviour:
   - RequestForPickupTimes
   - TaggedPlayer
   - NewPlayerSpawn
+  - PelletEaten
   DisableAutoOpenWizard: 1

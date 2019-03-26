@@ -8,6 +8,7 @@ TagManager:
   - Pacman
   - Node
   - Wall
+  - Pellet
   layers:
   - Default
   - TransparentFX

@@ -81,7 +81,15 @@ namespace Assets.Scripts
             {
                 Physics.IgnoreCollision(this.gameObject.GetComponent<SphereCollider>(), node.GameObject.GetComponent<SphereCollider>(), true);
             }
-        }              
+        }
+
+        [PunRPC]
+        void PelletEaten(string pelletName, PhotonMessageInfo info)
+        {
+            Debug.Log("IN PELLET EATENNNNNNNNN: " + pelletName);
+
+            Destroy(GameObject.Find(pelletName));
+        }
 
         /// <summary>
         /// MonoBehaviour method called when the Collider 'other' enters the trigger.
@@ -113,14 +121,10 @@ namespace Assets.Scripts
 
             }
 
-        }
-
-        void OnCollisionEnter(Collision col)
-        {
-            if (col.gameObject.tag == "Node")
+            //Pellet collision: Pellet removed from map, player score increases
+            else if (other.tag == "Pellet")
             {
-                Debug.Log("ONCOLLISIONENTER COLLISION WITH A NODE");
-                //Physics.IgnoreCollision(this.GetComponent<Collider>(), col.collider, true);
+                GetComponent<PhotonView>().RPC("PelletEaten", PhotonTargets.All, other.gameObject.name);
             }
         }
 
@@ -221,8 +225,6 @@ namespace Assets.Scripts
                                     }
                                 }
 
-                                Debug.Log("nodeInFront = " + nodeInFront.Index + "\tDistance = " + distanceToNode);
-
                                 //User facing south
                                 if (transform.forward.z < -0.98 && transform.forward.z > -1.02)
                                 {
@@ -248,7 +250,6 @@ namespace Assets.Scripts
                                 //User facing north
                                 else if (transform.forward.z > 0.98 && transform.forward.z < 1.02)
                                 {
-                                    Debug.Log("User facing north");
                                     //User tries to move west, turn west if they can
                                     if (lastKeyPressed == KeyCode.A && west != null && distanceToNode < 0.5f)
                                     {
@@ -317,12 +318,9 @@ namespace Assets.Scripts
                         //Wall ahead
                         else if (hit.collider.gameObject.tag == "Wall")
                         {
-                            Debug.Log("WALLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLL");
                             //User facing south
                             if (transform.forward.z < -0.98 && transform.forward.z > -1.02)
                             {
-                                Debug.Log("User facing south");
-
                                 //User tries to move west, turn west if they can
                                 if (lastKeyPressed == KeyCode.A && west != null)
                                 {
@@ -358,8 +356,6 @@ namespace Assets.Scripts
                             //User facing north
                             else if (transform.forward.z > 0.98 && transform.forward.z < 1.02)
                             {
-                                Debug.Log("User facing north");
-
                                 //User tries to move west, turn west if they can
                                 if (lastKeyPressed == KeyCode.A && west != null)
                                 {
@@ -430,8 +426,6 @@ namespace Assets.Scripts
                             //User facing east
                             else if (transform.forward.x > 0.98 && transform.forward.x < 1.02)
                             {
-                                Debug.Log("User facing east");
-
                                 //User tries to move north, turn north if they can
                                 if (lastKeyPressed == KeyCode.W && north != null)
                                 {
@@ -574,7 +568,6 @@ namespace Assets.Scripts
             // Check if the position of the cube and sphere are approximately equal.
             if (Vector3.Distance(transform.position, new Vector3(x, 0.5f, z)) < 0.1f)
             {
-                Debug.Log("HEEEEEEERRRRRRRRRREEEEEEEEE");
                 isAligning = false;
                 GetComponent<Rigidbody>().position = new Vector3(x, 0.5f, z);
                 GetComponent<Rigidbody>().MovePosition(transform.position + transform.forward * Time.deltaTime * moveSpeed);
