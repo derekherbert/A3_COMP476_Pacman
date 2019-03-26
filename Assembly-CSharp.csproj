@@ -213,12 +213,10 @@
     <Compile Include="Assets\Scripts\Tile Graph\AStar.cs" />
     <Compile Include="Assets\Scripts\Tile Graph\ClosedListItem.cs" />
     <Compile Include="Assets\Scripts\Tile Graph\Connection.cs" />
-    <Compile Include="Assets\Scripts\Tile Graph\Dijkstra.cs" />
     <Compile Include="Assets\Scripts\Tile Graph\Graph.cs" />
     <Compile Include="Assets\Scripts\Tile Graph\Heuristic.cs" />
     <Compile Include="Assets\Scripts\Tile Graph\Node.cs" />
     <Compile Include="Assets\Scripts\Tile Graph\OpenListItem.cs" />
-    <Compile Include="Assets\Scripts\Tile Graph\PriorityQueue.cs" />
     <Compile Include="Assets\Scripts\Tile Graph\TileGenerator.cs" />
     <None Include="Assets\Photon Unity Networking\Demos\MarcoPolo-Tutorial\marcopolo-readme.txt" />
     <None Include="Assets\Photon Unity Networking\link.xml" />

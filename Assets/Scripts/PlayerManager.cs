@@ -20,6 +20,7 @@ namespace Assets.Scripts
         private bool isRotating = false;
         private Vector3 currentDirection;
         private KeyCode lastKeyPressed;
+        Node nodeInFront, northEast, northWest, southEast, southWest;
 
         #endregion
 
@@ -129,9 +130,12 @@ namespace Assets.Scripts
         /// Processes the inputs. Maintain a flag representing when the user is pressing Fire.
         /// </summary>
         void ProcessInputs()
-        {   
+        {
+            
+
             GetComponent<Rigidbody>().MovePosition(transform.position + transform.forward * Time.deltaTime * 3);
 
+            
             //Set last key pressed
             if (Input.GetKeyDown(KeyCode.W) || Input.GetKeyDown(KeyCode.UpArrow))
             {
@@ -151,14 +155,12 @@ namespace Assets.Scripts
             }
 
             //Find node in front of player
-            Node nodeInFront;
             RaycastHit hit;
             Vector3 nodePostion = new Vector3(this.gameObject.transform.position.x, 5.0f, this.gameObject.transform.position.z);
 
             if (!isRotating)
             {
-                Debug.Log("Forward: " + transform.forward);
-
+                
                 if (Physics.Raycast(nodePostion, transform.forward, out hit, 1f))
                 {
                     //Node in front of player
@@ -167,81 +169,175 @@ namespace Assets.Scripts
                         int index = Convert.ToInt32(hit.collider.gameObject.name.Substring(5));
                         nodeInFront = TileGenerator.Graph.Nodes[index];
                         Debug.Log("Hit: " + index + "\tDistance: " + hit.distance);
-                    }
-                }
-                //No node: Corner!
-                else
-                {
-                    Debug.Log("NO HIT CORNER CORNER CORNER");
-                    //User facing south
-                    if (transform.forward.z == -1)
-                    {
-                        //Check for user's last input (must be left or right)
-                        if(lastKeyPressed == KeyCode.A)
-                        {
-                            rotation = 90;
-                        }
-                        else if (lastKeyPressed == KeyCode.D)
-                        {
-                            rotation = -90;
-                        }
-                        
-                        currentDirection = transform.forward;
-                        isRotating = true;
-                    }
-                    //User facing north
-                    else if (transform.forward.z == 1)
-                    {
-                        //Check for user's last input (must be left or right)
-                        if (lastKeyPressed == KeyCode.A)
-                        {
-                            rotation = -90;
-                        }
-                        else if (lastKeyPressed == KeyCode.D)
-                        {
-                            rotation = 90;
-                        }                                                
 
-                        currentDirection = transform.forward;
-                        isRotating = true;
+                        //Raycast northEast
+                        if (Physics.Raycast(nodeInFront.GameObject.transform.position, new Vector3(1, 0, 1), out hit, 1.5f))
+                        {
+                            if (hit.collider.gameObject.tag == "Node")
+                            {
+                                index = Convert.ToInt32(hit.collider.gameObject.name.Substring(5));
+                                northEast = TileGenerator.Graph.Nodes[index];
+                            }
+                        }
+                        //Raycast northWest
+                        if (Physics.Raycast(nodeInFront.GameObject.transform.position, new Vector3(-1, 0, 1), out hit, 1.5f))
+                        {
+                            if (hit.collider.gameObject.tag == "Node")
+                            {
+                                index = Convert.ToInt32(hit.collider.gameObject.name.Substring(5));
+                                northWest = TileGenerator.Graph.Nodes[index];
+                            }
+                        }
+                        //Raycast southEast
+                        if (Physics.Raycast(nodeInFront.GameObject.transform.position, new Vector3(1, 0, -1), out hit, 1.5f))
+                        {
+                            if (hit.collider.gameObject.tag == "Node")
+                            {
+                                index = Convert.ToInt32(hit.collider.gameObject.name.Substring(5));
+                                southEast = TileGenerator.Graph.Nodes[index];
+                            }
+                        }
+                        //Raycast southWest
+                        if (Physics.Raycast(nodeInFront.GameObject.transform.position, new Vector3(-1, 0, -1), out hit, 1.5f))
+                        {
+                            if (hit.collider.gameObject.tag == "Node")
+                            {
+                                index = Convert.ToInt32(hit.collider.gameObject.name.Substring(5));
+                                southWest = TileGenerator.Graph.Nodes[index];
+                            }
+                        }
                     }
-                    //User facing left
-                    else if (transform.forward.z == -1)
+                    //Wall ahead
+                    else if (hit.collider.gameObject.tag == "Wall")
                     {
-                        //Check for user's last input (must be left or right)
-                        if (lastKeyPressed == KeyCode.W)
-                        {
-                            rotation = -90;
-                        }
-                        else if (lastKeyPressed == KeyCode.S)
-                        {
-                            rotation = 90;
-                        }
+                        Debug.Log("WALLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLL");
+                        Debug.Log("Forward: " + transform.forward + "\tx: " + transform.forward.x + "\tz: " + transform.forward.z);
+                        //User facing south
+                        if (transform.forward.z < -0.98 && transform.forward.z > -1.02)
+                        {      
+                            //User tries to move left, turn left if they can
+                            if (lastKeyPressed == KeyCode.A && southWest != null)
+                            {
+                                rotation = 90;
+                                lastKeyPressed = KeyCode.Space; //Assign random meaningless key
+                            }
+                            //User tries to move right, turn right if they can
+                            else if (lastKeyPressed == KeyCode.D && southEast != null)
+                            {
+                                rotation = -90;
+                                lastKeyPressed = KeyCode.Space; //Assign random meaningless key
+                            }
+                            //Invalid or no user input, turn automatically (left by default)
+                            else if (southWest != null)
+                            {
+                                rotation = 90;
+                                lastKeyPressed = KeyCode.Space; //Assign random meaningless key
+                            }
+                            //Turn right automatically if can't turn left
+                            else if (southEast != null)
+                            {
+                                rotation = -90;
+                                lastKeyPressed = KeyCode.Space; //Assign random meaningless key
+                            }
 
-                        currentDirection = transform.forward;
-                        isRotating = true;
-                    }
-                    //User facing right
-                    else if (transform.forward.x == 1)
-                    {
-                        //Check for user's last input (must be left or right)
-                        if (lastKeyPressed == KeyCode.W)
-                        {
-                            rotation = 90;
+                            currentDirection = transform.forward;
+                            isRotating = true;
                         }
-                        else if (lastKeyPressed == KeyCode.S)
+                        //User facing north
+                        else if (transform.forward.z > 0.98 && transform.forward.z < 1.02)
                         {
-                            rotation = -90;
-                        }
+                            //User tries to move left, turn left if they can
+                            if (lastKeyPressed == KeyCode.A && northWest != null)
+                            {
+                                rotation = -90;
+                                lastKeyPressed = KeyCode.Space; //Assign random meaningless key
+                            }
+                            //User tries to move right, turn right if they can
+                            else if (lastKeyPressed == KeyCode.D && northEast != null)
+                            {
+                                rotation = -0;
+                                lastKeyPressed = KeyCode.Space; //Assign random meaningless key
+                            }
+                            //Invalid or no user input, turn automatically (left by default)
+                            else if (northWest != null)
+                            {
+                                rotation = -90;
+                                lastKeyPressed = KeyCode.Space; //Assign random meaningless key
+                            }
+                            //Turn right automatically if can't turn left
+                            else if (northEast != null)
+                            {
+                                rotation = 90;
+                                lastKeyPressed = KeyCode.Space; //Assign random meaningless key
+                            }
 
-                        currentDirection = transform.forward;
-                        isRotating = true;
+                            currentDirection = transform.forward;
+                            isRotating = true;
+                        }
+                        //User facing left
+                        else if (transform.forward.x < -0.98 && transform.forward.x > -1.02)
+                        {
+                            //User tries to move north, turn north if they can
+                            if (lastKeyPressed == KeyCode.W && northWest != null)
+                            {
+                                rotation = -90;
+                                lastKeyPressed = KeyCode.Space; //Assign random meaningless key
+                            }
+                            //User tries to move right, turn right if they can
+                            else if (lastKeyPressed == KeyCode.S && southWest != null)
+                            {
+                                rotation = 90;
+                                lastKeyPressed = KeyCode.Space; //Assign random meaningless key
+                            }
+                            //Invalid or no user input, turn automatically (left by default)
+                            else if (northWest != null)
+                            {
+                                rotation = -90;
+                                lastKeyPressed = KeyCode.Space; //Assign random meaningless key
+                            }
+                            //Turn right automatically if can't turn left
+                            else if (southWest != null)
+                            {
+                                rotation = 90;
+                                lastKeyPressed = KeyCode.Space; //Assign random meaningless key
+                            }
+
+                            currentDirection = transform.forward;
+                            isRotating = true;
+                        }
+                        //User facing right
+                        else if (transform.forward.x > 0.98 && transform.forward.x < 1.02)
+                        {
+                            //User tries to move north, turn north if they can
+                            if (lastKeyPressed == KeyCode.W && northEast != null)
+                            {
+                                rotation = -90;
+                                lastKeyPressed = KeyCode.Space; //Assign random meaningless key
+                            }
+                            //User tries to move south, turn south if they can
+                            else if (lastKeyPressed == KeyCode.S && southEast != null)
+                            {
+                                rotation = 90;
+                                lastKeyPressed = KeyCode.Space; //Assign random meaningless key
+                            }
+                            //Invalid or no user input, turn automatically (north by default)
+                            else if (northEast != null)
+                            {
+                                rotation = -90;
+                                lastKeyPressed = KeyCode.Space; //Assign random meaningless key
+                            }
+                            //Turn south automatically if can't turn north
+                            else if (southEast != null)
+                            {
+                                rotation = 90;
+                                lastKeyPressed = KeyCode.Space; //Assign random meaningless key
+                            }
+
+                            currentDirection = transform.forward;
+                            isRotating = true;
+                        }
                     }
-                    else
-                    {
-                        rotation = 90.0f;
-                    }
-                }
+                }                
             }
 
             if (isRotating)
@@ -249,56 +345,85 @@ namespace Assets.Scripts
                 Debug.Log("Angle: " + Vector3.Angle(currentDirection.normalized, transform.forward.normalized));
                 if (Mathf.Abs(Vector3.Angle(currentDirection.normalized, transform.forward.normalized)) <= 90)
                 {
+                    Debug.Log("rotatePlayer(" + rotation + ")");
                     rotatePlayer(rotation);
                 }
                 else
                 {
                     isRotating = false;
 
-                    //Align user direction perfectly with x and z axis
-                    float x = transform.forward.x;
-                    float z = transform.forward.z;
-
-                    if (Mathf.Abs(x) * 2 > 1)
-                    {
-                        if (x > 0)
-                        {
-                            x = 1;
-                        }
-                        else
-                        {
-                            x = -1;
-                        }                            
-                    }
-                    else
-                    {
-                        x = 0;
-                    }
-                    if (Mathf.Abs(z) * 2 > 1)
-                    {
-                        if (z > 0)
-                        {
-                            z = 1;
-                        }
-                        else
-                        {
-                            z = -1;
-                        }
-                    }
-                    else
-                    {
-                        z = 0;
-                    }
-
-                    this.transform.forward = new Vector3(x, 0, z);
+                    alignPlayer();
                 }
             }
         }
 
         private void rotatePlayer(float rotation)
         {
-            Quaternion deltaRotation = Quaternion.Euler(new Vector3(0, rotation, 0) * Time.deltaTime * 4);
+            Quaternion deltaRotation = Quaternion.Euler(new Vector3(0, rotation, 0) * Time.deltaTime * 5);
             GetComponent<Rigidbody>().MoveRotation(GetComponent<Rigidbody>().rotation * deltaRotation);
+        }
+
+        private void alignPlayer()
+        {
+            //Align user direction perfectly with x and z axis
+            float x = transform.forward.x;
+            float z = transform.forward.z;
+
+            if (Mathf.Abs(x) * 2 > 1)
+            {
+                if (x > 0)
+                {
+                    x = 1.0f;
+                }
+                else
+                {
+                    x = -1.0f;
+                }
+            }
+            else
+            {
+                x = 0.0f;
+            }
+            if (Mathf.Abs(z) * 2 > 1)
+            {
+                if (z > 0)
+                {
+                    z = 1.0f;
+                }
+                else
+                {
+                    z = -1.0f;
+                }
+            }
+            else
+            {
+                z = 0.0f;
+            }
+
+            this.transform.forward = new Vector3(x, 0.0f, z);
+
+            x = transform.position.x;
+            z = transform.position.z;
+
+            if (x < 0)
+            {
+                x = (int)x - 0.5f;
+            }
+            else if (x > 0)
+            {
+                x = (int)x + 0.5f;
+            }
+            if (z < 0)
+            {
+                z = (int)z - 0.5f;
+            }
+            else if (z > 0)
+            {
+                z = (int)z + 0.5f;
+            }
+
+            //this.transform.position = new Vector3(x, 0.5f, z);
+            GetComponent<Rigidbody>().MovePosition(new Vector3(x, 0.5f, z) + transform.forward * Time.deltaTime * 20);
         }
 
         public void OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)

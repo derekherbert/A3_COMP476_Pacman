@@ -13,7 +13,6 @@ public class AStar
         openList = new List<OpenListItem>(); //Ordered by increasing estimatedTotalCost
     }
 
-    //TO DO
     public List<Node> GetPath(Vector3 startPosition, Vector3 endPosition, Heuristic heuristic)
     {
         return GetPath(findClosestNode(startPosition), findClosestNode(endPosition), heuristic);

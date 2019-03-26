@@ -23,7 +23,7 @@ public class TileGenerator : Photon.PunBehaviour
         {
             //Create empty GameObject in the scene
             GameObject node = GameObject.Instantiate(sampleNode);
-            node.transform.position = new Vector3(floor.transform.position.x, 1f, floor.transform.position.z);
+            node.transform.position = new Vector3(floor.transform.position.x, 5f, floor.transform.position.z);
             node.name = "Node_" + Graph.Nodes.Count;
             node.GetComponent<SphereCollider>().enabled = true;
 
@@ -57,7 +57,7 @@ public class TileGenerator : Photon.PunBehaviour
         //Testing
         if (Graph.Connections.Count == 928 && runTest)
         {
-            showPath();
+            //showPath();
             runTest = false;
         }
     }
@@ -66,8 +66,8 @@ public class TileGenerator : Photon.PunBehaviour
     private void showPath()
     {
         AStar aStar = new AStar();
-        List<Node> path = aStar.GetPath(Graph.Nodes[0], Graph.Nodes[215], Heuristic.EUCLIDIAN);
-        //List<Connection> path = aStar.GetPath(new Vector3(-6f, 0f, 8f), new Vector3(8f, 0f, 2f), Heuristic.EUCLIDIAN);
+        //List<Node> path = aStar.GetPath(Graph.Nodes[0], Graph.Nodes[215], Heuristic.EUCLIDIAN);
+        List<Node> path = aStar.GetPath(new Vector3(-8f, 1f, 10f), new Vector3(8.2f, 0f, -4.3f), Heuristic.EUCLIDIAN);
         
         foreach (Node node in path)
         {
