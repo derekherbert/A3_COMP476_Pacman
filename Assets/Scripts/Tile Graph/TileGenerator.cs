@@ -81,8 +81,6 @@ public class TileGenerator : Photon.PunBehaviour
     {
         RaycastHit hit;
 
-        Debug.DrawRay(node.GameObject.transform.position, direction.normalized, Color.white, 5000f);
-
         if (Physics.Raycast(node.GameObject.transform.position, direction.normalized, out hit, 1.2f))
         {
             if (hit.collider.gameObject.tag == "Node")
