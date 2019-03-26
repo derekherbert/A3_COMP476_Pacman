@@ -75,12 +75,7 @@ namespace Assets.Scripts
             this.gameObject.name = "Pacman_" + PhotonNetwork.player.NickName;
 
             //Set player's color
-            this.GetComponent<Renderer>().material.color = GameManager.colors[PhotonNetwork.playerList.Length - 1];
-
-            foreach (Node node in TileGenerator.Graph.Nodes)
-            {
-                Physics.IgnoreCollision(this.gameObject.GetComponent<SphereCollider>(), node.GameObject.GetComponent<SphereCollider>(), true);
-            }
+            this.GetComponent<Renderer>().material.color = GameManager.colors[PhotonNetwork.playerList.Length - 1];            
         }
 
         [PunRPC]
@@ -88,7 +83,8 @@ namespace Assets.Scripts
         {
             Debug.Log("IN PELLET EATENNNNNNNNN: " + pelletName);
 
-            Destroy(GameObject.Find(pelletName));
+            PhotonNetwork.Destroy(GameObject.Find(pelletName));
+            PhotonNetwork.Destroy(GameObject.Find(pelletName).GetPhotonView());
         }
 
         /// <summary>
@@ -125,6 +121,8 @@ namespace Assets.Scripts
             else if (other.tag == "Pellet")
             {
                 GetComponent<PhotonView>().RPC("PelletEaten", PhotonTargets.All, other.gameObject.name);
+                PhotonNetwork.Destroy(other.gameObject);
+                PhotonNetwork.Destroy(other.gameObject.GetPhotonView());
             }
         }
 
