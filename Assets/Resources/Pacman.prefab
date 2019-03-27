@@ -201,7 +201,7 @@ GameObject:
   - component: {fileID: 7160739848000823238}
   m_Layer: 0
   m_Name: Pacman
-  m_TagString: Untagged
+  m_TagString: Pacman
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -400,6 +400,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   score: 0
   startingPosition: {x: 0, y: 0, z: 0}
+  moveSpeed: 2
   rotationSpeed: 100
 --- !u!54 &7160739848000823238
 Rigidbody:

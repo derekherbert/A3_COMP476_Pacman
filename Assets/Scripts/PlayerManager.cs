@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace Assets.Scripts
 {
@@ -9,25 +10,28 @@ namespace Assets.Scripts
     {
         #region Public Variables
 
-        public int score;
-        public Vector3 startingPosition;
-
         [Tooltip("The local player instance. Use this to know if the local player is represented in the Scene")]
-        public static GameObject LocalPlayerInstance;
+        public static PhotonView LocalPlayerInstance;
+        
+        public Vector3 startingPosition;
         public static string playerName;
         public float moveSpeed = 2.0f;
-        private float rotation = 0.0f;
+        
         public float rotationSpeed = 3;
-        private bool isRotating = false;
-        private bool isAligning = false;
-        private Vector3 currentDirection;
-        private KeyCode lastKeyPressed;
-        Node nodeInFront, north, south, east, west;
+
 
         #endregion
 
         #region Private Variables
 
+        private bool isRotating = false;
+        private bool isAligning = false;
+        private Vector3 currentDirection;
+        private KeyCode lastKeyPressed;
+        private Node nodeInFront, north, south, east, west;
+        private float rotation = 0.0f;
+        private GameObject pelletBeingDestroyed;
+        private int playerNumber;
 
 
         #endregion
@@ -43,7 +47,7 @@ namespace Assets.Scripts
             // used in GameManager.cs: we keep track of the localPlayer instance to prevent instantiation when levels are synchronized
             if (photonView.isMine)
             {
-                PlayerManager.LocalPlayerInstance = this.gameObject;
+                PlayerManager.LocalPlayerInstance = this.photonView;
             }
             // #Critical
             // we flag as don't destroy on load so that instance survives level synchronization, thus giving a seamless experience when levels load.
@@ -66,25 +70,43 @@ namespace Assets.Scripts
             }
         }
 
-        [PunRPC]
-        void NewPlayerSpawn(PhotonMessageInfo info)
+        public static void NewPlayerSpawn(int playerViewID, string playerName)
         {
-            Debug.Log("IN NEW PLAYER SPAWNNNNNNNNNNNNNN");
+            LocalPlayerInstance.RPC("NewPlayerSpawnRPC", PhotonTargets.All, playerViewID, playerName);
+        }            
 
-            //Set player's GameObject name
-            this.gameObject.name = "Pacman_" + PhotonNetwork.player.NickName;
+        [PunRPC]
+        void NewPlayerSpawnRPC(int playerViewID, string playerName, PhotonMessageInfo info)
+        {
+            if (photonView.isMine)
+            {
+                Debug.Log("IN NEW PLAYER SPAWNNNNNNNNNNNNNN");
 
-            //Set player's color
-            this.GetComponent<Renderer>().material.color = GameManager.colors[PhotonNetwork.playerList.Length - 1];            
+                PhotonView playerView = PhotonView.Find(playerViewID);
+                
+                //Set player's GameObject name
+                playerView.name = "Pacman_" + playerName;
+
+                //Set player number
+                playerNumber = PhotonNetwork.playerList.Length - 1;
+
+                //Set player's color
+                playerView.GetComponent<Renderer>().material.color = GameManager.colors[playerNumber];
+
+                //Set player's score
+                PhotonNetwork.player.AddScore(0);
+            }
         }
 
         [PunRPC]
-        void PelletEaten(string pelletName, PhotonMessageInfo info)
+        void PelletEaten(int pelletViewID, PhotonMessageInfo info)
         {
-            Debug.Log("IN PELLET EATENNNNNNNNN: " + pelletName);
+            if (PhotonNetwork.isMasterClient)
+            {
+                Debug.Log("IN PELLET EATENNNNNNNNN: " + PhotonView.Find(pelletViewID).gameObject.name);
 
-            PhotonNetwork.Destroy(GameObject.Find(pelletName));
-            PhotonNetwork.Destroy(GameObject.Find(pelletName).GetPhotonView());
+                PhotonNetwork.Destroy(PhotonView.Find(pelletViewID));
+            }            
         }
 
         /// <summary>
@@ -98,31 +120,36 @@ namespace Assets.Scripts
             {
                 return;
             }
-            
-            if (other.tag == "Node")
-            {
-                Debug.Log("ONTRIGGERENTER COLLISION WITH A NODE");
-                //Physics.IgnoreCollision(this.GetComponent<Collider>(), other.GetComponent<Collider>(), true);
-            }
-
+                        
             //Pacman collision: Both players bounce back and rotate towards where they were coming from
-            else if (other.name.Contains("Pacman"))
+            if (other.tag == "Pacman")
             {
                 Debug.Log("OYYYYYYYY");
             }
 
-            //Ghost collision: Player's position is reset to starting point. Score is decreased.
-            else if (other.name.Contains("Ghost"))
+            //Ghost collision: Player is kicked from the game. 
+            else if (other.tag == "Ghost")
             {
-
+                GameManager.Instance.LeaveRoom();
             }
 
             //Pellet collision: Pellet removed from map, player score increases
             else if (other.tag == "Pellet")
             {
-                GetComponent<PhotonView>().RPC("PelletEaten", PhotonTargets.All, other.gameObject.name);
-                PhotonNetwork.Destroy(other.gameObject);
-                PhotonNetwork.Destroy(other.gameObject.GetPhotonView());
+                if (pelletBeingDestroyed == null || pelletBeingDestroyed != other.gameObject)
+                {
+                    photonView.RPC("PelletEaten", PhotonTargets.MasterClient, other.GetComponent<PhotonView>().viewID);
+
+                    PhotonNetwork.player.AddScore(1);
+
+                    Debug.Log("Local player score: " + PhotonNetwork.player.GetScore());
+
+                    pelletBeingDestroyed = other.gameObject;
+
+                    //Update score on UI
+                    PhotonView.Find(GameManager.playerScoreTextBoxPhotonIDs[playerNumber]).GetComponent<Text>().text = PhotonNetwork.player.NickName + ": " + PhotonNetwork.player.GetScore();
+
+                }
             }
         }
 
@@ -484,7 +511,6 @@ namespace Assets.Scripts
 
         private void rotatePlayer(float rotation, float speed)
         {
-            //Quaternion deltaRotation = Quaternion.Euler(new Vector3(0, rotation, 0) * Time.deltaTime * 5);
             Quaternion deltaRotation = Quaternion.Euler(new Vector3(0, rotation, 0) * Time.deltaTime * speed);
             GetComponent<Rigidbody>().MoveRotation(GetComponent<Rigidbody>().rotation * deltaRotation);
         }
@@ -548,18 +574,6 @@ namespace Assets.Scripts
                 z = (int)z + 0.5f;
             }
 
-            //this.transform.position = new Vector3(x, 0.5f, z);
-            //GetComponent<Rigidbody>().MovePosition(new Vector3(x, 0.5f, z) + transform.forward * Time.deltaTime * 1);
-            
-            
-            
-            //GetComponent<Rigidbody>().MovePosition(new Vector3(x, 0.5f, z) + transform.forward * 0.3f); //+ transform.forward * Time.deltaTime);
-
-
-
-
-
-
             float step = 3.0f * Time.deltaTime; // calculate distance to move
             transform.position = Vector3.MoveTowards(transform.position, new Vector3(x, 0.5f, z), step);
 
@@ -577,12 +591,12 @@ namespace Assets.Scripts
             if (stream.isWriting)
             {
                 // We own this player: send the others our data
-               // stream.SendNext(IsFiring);
+               //stream.SendNext(score);
             }
             else
             {
                 // Network player, receive data
-                //this.IsFiring = (bool)stream.ReceiveNext();
+                //this.score = (int)stream.ReceiveNext();
             }
         }
         #endregion

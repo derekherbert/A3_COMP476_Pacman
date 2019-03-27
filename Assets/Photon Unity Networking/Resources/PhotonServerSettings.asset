@@ -45,4 +45,5 @@ MonoBehaviour:
   - TaggedPlayer
   - NewPlayerSpawn
   - PelletEaten
+  - NewPlayerSpawnRPC
   DisableAutoOpenWizard: 1
