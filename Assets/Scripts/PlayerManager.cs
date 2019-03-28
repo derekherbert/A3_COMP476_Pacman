@@ -17,9 +17,9 @@ namespace Assets.Scripts
         public Vector3 startingPosition;
         public static string playerName;
         public float moveSpeed = 2.0f;
-        
         public float rotationSpeed = 3;
-
+        public bool recentlyCollided = false;
+        public int recentlyCollidedCtr = 0;
 
         #endregion
 
@@ -67,7 +67,14 @@ namespace Assets.Scripts
         void Update()
         {            
             if (photonView.isMine)
-            {                
+            {
+                //Check preemptively for collision with another entity
+                RaycastHit hit;
+                if (Physics.Raycast(transform.position, transform.forward, out hit, 1f))
+                {
+                    //if (hit.collider.tag)
+                }
+
                 ProcessInputs();                        
             }
         }
@@ -128,19 +135,30 @@ namespace Assets.Scripts
             }
                         
             //Pacman collision: Both players bounce back and rotate towards where they were coming from
-            if (other.tag == "Pacman")
+            if (other.gameObject.tag == "Pacman")
             {
-                Debug.Log("OYYYYYYYY");
+                recentlyCollided = true;
+                recentlyCollidedCtr = 0;
+
+                Debug.Log("COLLIDING WITH ANOTHER PACMAN");
+                Debug.Log("Current Rotation: " + GetComponent<Rigidbody>().rotation.eulerAngles.y);
+
+                Quaternion rotation = Quaternion.Euler(new Vector3(0, - GetComponent<Rigidbody>().rotation.eulerAngles.y, 0));
+                GetComponent<Rigidbody>().rotation = rotation;
+
+                Debug.Log("New Rotation: " + GetComponent<Rigidbody>().rotation.eulerAngles.y);
+
+                GetComponent<Rigidbody>().MovePosition(transform.position + transform.forward  * Time.deltaTime * 5);
             }
 
             //Ghost collision: Player is kicked from the game. 
-            else if (other.tag == "Ghost")
+            else if (other.gameObject.tag == "Ghost")
             {
                 GameManager.Instance.LeaveRoom();
             }
 
             //Pellet collision: Pellet removed from map, player score increases
-            else if (other.tag == "Pellet")
+            else if (other.gameObject.tag == "Pellet")
             {
                 if (pelletBeingDestroyed == null || pelletBeingDestroyed != other.gameObject)
                 {
@@ -169,9 +187,17 @@ namespace Assets.Scripts
         void ProcessInputs()
         {
             if (!isAligning)
-            { 
-                GetComponent<Rigidbody>().MovePosition(transform.position + transform.forward * Time.deltaTime * moveSpeed);
-
+            {
+                if (recentlyCollided && recentlyCollidedCtr < 5)
+                {
+                    GetComponent<Rigidbody>().MovePosition(transform.position + transform.forward * Time.deltaTime * 5);
+                    recentlyCollidedCtr++;                    
+                }
+                else
+                {
+                    GetComponent<Rigidbody>().MovePosition(transform.position + transform.forward * Time.deltaTime * moveSpeed);
+                    recentlyCollidedCtr = 0;
+                }
 
                 //Set last key pressed
                 if (Input.GetKeyDown(KeyCode.W) || Input.GetKeyDown(KeyCode.UpArrow))
