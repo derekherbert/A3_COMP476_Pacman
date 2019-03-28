@@ -70,7 +70,7 @@ namespace Assets.Scripts
             {
                 //Check preemptively for collision with another entity
                 RaycastHit hit;
-                if (Physics.Raycast(new Vector3(transform.position.x, 0.85f, transform.position.z), transform.forward, out hit, 1.5f))
+                if (Physics.Raycast(new Vector3(transform.position.x, 0.85f, transform.position.z), transform.forward, out hit, 1.7f))
                 {
                     if (hit.collider.tag == "Pacman")
                     {

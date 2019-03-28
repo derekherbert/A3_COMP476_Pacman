@@ -398,10 +398,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3a8fb8f9a65dfe94ea63a08bfa58eba1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  score: 0
   startingPosition: {x: 0, y: 0, z: 0}
   moveSpeed: 2
   rotationSpeed: 100
+  recentlyCollided: 0
+  recentlyCollidedCtr: 0
 --- !u!54 &7160739848000823238
 Rigidbody:
   m_ObjectHideFlags: 0

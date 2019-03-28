@@ -212,6 +212,7 @@
      <Compile Include="Assets\Scripts\Tile Graph\Node.cs" />
      <Compile Include="Assets\Scripts\Tile Graph\OpenListItem.cs" />
      <Compile Include="Assets\Scripts\Tile Graph\TileGenerator.cs" />
+     <Compile Include="Assets\Scripts\Timer.cs" />
      <None Include="Assets\Photon Unity Networking\Demos\MarcoPolo-Tutorial\marcopolo-readme.txt" />
      <None Include="Assets\Photon Unity Networking\link.xml" />
      <None Include="Assets\Photon Unity Networking\Demos\DemoBoxes\Resources\eurof_tt.txt" />

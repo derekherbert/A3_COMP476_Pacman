@@ -31,7 +31,7 @@ namespace Assets.Scripts
                                          Color.blue,
                                          Color.red
                                        };
-        public static int[] playerScoreTextBoxPhotonIDs = { 63, 357 };
+        public static int[] playerScoreTextBoxPhotonIDs = { 372, 357 };
 
         public static List<PlayerInfo> playerInfoList;
         public static Vector3[] fruitPositions = { new Vector3(0.5f, 0.5f, 0.5f),   //Middle
@@ -41,6 +41,8 @@ namespace Assets.Scripts
                                                    new Vector3(-9.5f, 0.5f, -9.5f)  //Bottom-left corner
                                                  };
         public static int fruitPositionCtr = 0;
+
+        public static float startTime;
 
         #endregion
 
@@ -65,12 +67,11 @@ namespace Assets.Scripts
                 
                 PlayerManager.NewPlayerSpawn(PhotonNetwork.playerName, PhotonNetwork.player.ID, playerPhotonView.viewID);
             }
-        }        
-        
+        }
+
         #endregion
 
         #region Photon Messages
-
 
         /// <summary>
         /// Called when the local player left the room. We need to load the launcher scene.
