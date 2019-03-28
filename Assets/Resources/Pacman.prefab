@@ -524,7 +524,7 @@ GameObject:
   - component: {fileID: 357068607697553436}
   - component: {fileID: 357068607697553437}
   m_Layer: 0
-  m_Name: Sphere
+  m_Name: Pupil
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -707,7 +707,7 @@ GameObject:
   - component: {fileID: 357068608679358069}
   - component: {fileID: 357068608679358070}
   m_Layer: 0
-  m_Name: Sphere
+  m_Name: Pupil
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

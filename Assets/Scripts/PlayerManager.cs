@@ -14,7 +14,6 @@ namespace Assets.Scripts
         [Tooltip("The local player instance. Use this to know if the local player is represented in the Scene")]
         public static PhotonView LocalPlayerInstance;
         
-        public Vector3 startingPosition;
         public static string playerName;
         public float moveSpeed = 2.0f;
         public float rotationSpeed = 3;
@@ -55,12 +54,7 @@ namespace Assets.Scripts
             // we flag as don't destroy on load so that instance survives level synchronization, thus giving a seamless experience when levels load.
             DontDestroyOnLoad(this.gameObject);
         }
-
-        void Start()
-        {
-            LocalPlayerInstance.GetComponent<SphereCollider>().isTrigger = true;
-        }
-
+        
         /// <summary>
         /// MonoBehaviour method called on GameObject by Unity on every frame.
         /// </summary>

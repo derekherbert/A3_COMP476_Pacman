@@ -60,6 +60,13 @@ namespace Assets.Scripts
             Instance = this;
             playerInfoList = new List<PlayerInfo>(4);
 
+            //Spawn ghosts
+            if (PhotonNetwork.isMasterClient)
+            {
+                PhotonView ghost1PhotonView = PhotonNetwork.Instantiate("Ghost", new Vector3(-0.5f, 1f, 0.5f), Quaternion.Euler(new Vector3(0, -90, 0)), 0).GetPhotonView();
+                PhotonView ghost2PhotonView = PhotonNetwork.Instantiate("Ghost", new Vector3(1.5f, 1f, 0.5f), Quaternion.Euler(new Vector3(0, 90, 0)), 0).GetPhotonView();
+            }
+
             //Only instantiate a player if there is no local reference already
             if (PlayerManager.LocalPlayerInstance == null)
             {
@@ -67,7 +74,7 @@ namespace Assets.Scripts
                 PhotonView playerPhotonView = PhotonNetwork.Instantiate(this.playerPrefab.name, startingPositions[PhotonNetwork.playerList.Length - 1], Quaternion.Euler(startingRotations[PhotonNetwork.playerList.Length - 1]), 0).GetPhotonView();
                 
                 PlayerManager.NewPlayerSpawn(PhotonNetwork.playerName, PhotonNetwork.player.ID, playerPhotonView.viewID);
-            }
+            }            
         }
 
         void Update()

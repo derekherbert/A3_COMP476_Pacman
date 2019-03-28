@@ -1,7 +1,8 @@
 {
   "ExpandedNodes": [
-    ""
+    "",
+    "\\Tile Graph"
   ],
-  "SelectedNode": "\\PlayerManager.cs",
+  "SelectedNode": "\\Tile Graph\\AStar.cs",
   "PreviewInSolutionExplorer": false
 }
