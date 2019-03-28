@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 
 namespace Assets.Scripts
 {
@@ -32,7 +33,7 @@ namespace Assets.Scripts
         private float rotation = 0.0f;
         private GameObject pelletBeingDestroyed;
         private int playerNumber;
-
+        private Color playerColor, syncColor, tempColor;
 
         #endregion
 
@@ -64,8 +65,17 @@ namespace Assets.Scripts
         /// </summary>
         void Update()
         {
+            if (!OnPhotonSerializeView.isMine)
+            {
+                gameObject.renderer.material.color = synccolor;
+                return;
+            }
+
             if (photonView.isMine)
             {
+                //Update color
+                playerView.GetComponent<Renderer>().material.color = this.playerColor;
+
                 ProcessInputs();                        
             }
         }
@@ -92,6 +102,7 @@ namespace Assets.Scripts
 
                 //Set player's color
                 playerView.GetComponent<Renderer>().material.color = GameManager.colors[playerNumber];
+                this.playerColor = GameManager.colors[playerNumber];
 
                 //Set player's score
                 PhotonNetwork.player.AddScore(0);
@@ -590,14 +601,20 @@ namespace Assets.Scripts
         {
             if (stream.isWriting)
             {
-                // We own this player: send the others our data
-               //stream.SendNext(score);
+                //send color
+                tempcolor = new Vector3(gameObject.renderer.material.color.r, gameObject.renderer.material.color.g, gameObject.renderer.material.color.b);
+
+                stream.Serialize(ref tempcolor);
             }
             else
             {
-                // Network player, receive data
-                //this.score = (int)stream.ReceiveNext();
+                //get color
+                stream.Serialize(ref tempcolor);
+
+                synccolor = new Color(tempcolor.x, tempcolor.y, tempcolor.z, 1.0f);
+
             }
+
         }
         #endregion
     }
