@@ -70,7 +70,7 @@ namespace Assets.Scripts
             {
                 //Check preemptively for collision with another entity
                 RaycastHit hit;
-                if (Physics.Raycast(new Vector3(transform.position.x, 0.85f, transform.position.z), transform.forward, out hit, 1f))
+                if (Physics.Raycast(new Vector3(transform.position.x, 0.85f, transform.position.z), transform.forward, out hit, 1.5f))
                 {
                     if (hit.collider.tag == "Pacman")
                     {
@@ -151,7 +151,7 @@ namespace Assets.Scripts
             //Pacman collision: Both players bounce back and rotate towards where they were coming from
             if (other.gameObject.tag == "Pacman")
             {
-                /*recentlyCollided = true;
+                recentlyCollided = true;
                 recentlyCollidedCtr = 0;
 
                 Debug.Log("COLLIDING WITH ANOTHER PACMAN");
@@ -161,8 +161,12 @@ namespace Assets.Scripts
                 GetComponent<Rigidbody>().rotation = rotation;
 
                 Debug.Log("New Rotation: " + GetComponent<Rigidbody>().rotation.eulerAngles.y);
+                                
 
-                GetComponent<Rigidbody>().MovePosition(transform.position + transform.forward  * Time.deltaTime * 5);*/
+                GetComponent<Rigidbody>().MovePosition(transform.position + transform.forward  * Time.deltaTime * 4);
+
+                isAligning = true;
+                alignPlayer();
             }
 
             //Ghost collision: Player is kicked from the game. 
@@ -202,9 +206,9 @@ namespace Assets.Scripts
         {
             if (!isAligning)
             {
-                if (recentlyCollided && recentlyCollidedCtr < 20)
+                if (recentlyCollided && recentlyCollidedCtr < 15)
                 {
-                    GetComponent<Rigidbody>().MovePosition(transform.position + transform.forward * Time.deltaTime * 5);
+                    GetComponent<Rigidbody>().MovePosition(transform.position + transform.forward * Time.deltaTime * 4);
                     recentlyCollidedCtr++;                    
                 }
                 else
