@@ -9,6 +9,7 @@ TagManager:
   - Node
   - Wall
   - Pellet
+  - Fruit
   layers:
   - Default
   - TransparentFX
