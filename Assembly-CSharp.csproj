@@ -201,6 +201,7 @@
      <Compile Include="Assets\PhotonChatApi\IChatClientListener.cs" />
      <Compile Include="Assets\Scripts\GameManager.cs" />
      <Compile Include="Assets\Scripts\Launcher.cs" />
+     <Compile Include="Assets\Scripts\PlayerInfo.cs" />
      <Compile Include="Assets\Scripts\PlayerManager.cs" />
      <Compile Include="Assets\Scripts\PlayerNameInputField.cs" />
      <Compile Include="Assets\Scripts\Tile Graph\AStar.cs" />

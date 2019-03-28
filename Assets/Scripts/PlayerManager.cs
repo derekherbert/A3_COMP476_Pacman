@@ -65,49 +65,43 @@ namespace Assets.Scripts
         /// MonoBehaviour method called on GameObject by Unity on every frame.
         /// </summary>
         void Update()
-        {
-            if (!photonView.isMine)
-            {
-                photonView.GetComponent<Renderer>().material.color = syncColor;
-                return;
-            }
-
+        {            
             if (photonView.isMine)
-            {
-                //Update color
-                GetComponent<Renderer>().material.color = this.playerColor;
-
+            {                
                 ProcessInputs();                        
             }
         }
 
-        public static void NewPlayerSpawn(int playerViewID, string playerName)
+        public static void NewPlayerSpawn(string playerName, int actorID, int playerViewID)
         {
-            LocalPlayerInstance.RPC("NewPlayerSpawnRPC", PhotonTargets.All, playerViewID, playerName);
+            LocalPlayerInstance.RPC("NewPlayerSpawnRPC", PhotonTargets.All, playerName, actorID, playerViewID);
         }            
 
         [PunRPC]
-        void NewPlayerSpawnRPC(int playerViewID, string playerName, PhotonMessageInfo info)
-        {
-            if (photonView.isMine)
-            {
-                Debug.Log("IN NEW PLAYER SPAWNNNNNNNNNNNNNN");
-
-                PhotonView playerView = PhotonView.Find(playerViewID);
+        void NewPlayerSpawnRPC(string playerName, int playerActorID, int playerViewID, PhotonMessageInfo info)
+        {            
+            PhotonView playerView = PhotonView.Find(playerViewID);
                 
-                //Set player's GameObject name
-                playerView.name = "Pacman_" + playerName;
+            //Set player's GameObject name
+            playerView.name = "Pacman_" + playerName;
 
-                //Set player number
-                playerNumber = PhotonNetwork.playerList.Length - 1;
+            //Set player number
+            playerNumber = PhotonNetwork.playerList.Length - 1;
 
-                //Set player's color
-                playerView.GetComponent<Renderer>().material.color = GameManager.colors[playerNumber];
-                this.playerColor = GameManager.colors[playerNumber];
+            //Set player's color
+            playerView.GetComponent<Renderer>().material.color = GameManager.colors[playerNumber];
+            this.playerColor = GameManager.colors[playerNumber];
 
-                //Set player's score
-                PhotonNetwork.player.AddScore(0);
+            PhotonPlayer thisPlayer = null;
+            foreach (PhotonPlayer player in PhotonNetwork.playerList)
+            {
+                if (player.NickName == playerName)
+                {
+                    thisPlayer = player;
+                }
             }
+
+            GameManager.playerInfoList[playerNumber] = new PlayerInfo(playerName, thisPlayer.ID, playerView.viewID, GameManager.playerScoreTextBoxPhotonIDs[playerNumber], GameManager.colors[playerNumber]);
         }
 
         [PunRPC]
@@ -603,16 +597,16 @@ namespace Assets.Scripts
             if (stream.isWriting)
             {
                 //send color
-                tempColor = new Vector3(playerColor.r, playerColor.g, playerColor.b);
+                //tempColor = new Vector3(playerColor.r, playerColor.g, playerColor.b);
 
-                stream.Serialize(ref tempColor);
+               // stream.Serialize(ref tempColor);
             }
             else
             {
                 //get color
-                stream.Serialize(ref tempColor);
+                //stream.Serialize(ref tempColor);
 
-                syncColor = new Color(tempColor.x, tempColor.y, tempColor.z, 1.0f);
+                //syncColor = new Color(tempColor.x, tempColor.y, tempColor.z, 1.0f);
 
             }
 

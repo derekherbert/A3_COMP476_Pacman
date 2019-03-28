@@ -33,9 +33,8 @@ namespace Assets.Scripts
                                        };
         public static int[] playerScoreTextBoxPhotonIDs = { 63, 357 };
 
-
-        public static List<int> PlayerScores;
-
+        public static List<PlayerInfo> playerInfoList;
+        
         #endregion
 
         #region Private Variables
@@ -49,7 +48,7 @@ namespace Assets.Scripts
         void Start()
         {
             Instance = this;
-            PlayerScores = new List<int>(4);
+            playerInfoList = new List<PlayerInfo>(4);
 
             //Only instantiate a player if there is no local reference already
             if (PlayerManager.LocalPlayerInstance == null)
@@ -57,7 +56,7 @@ namespace Assets.Scripts
                 //Create a new player from a prefab
                 PhotonView playerPhotonView = PhotonNetwork.Instantiate(this.playerPrefab.name, startingPositions[PhotonNetwork.playerList.Length - 1], Quaternion.Euler(startingRotations[PhotonNetwork.playerList.Length - 1]), 0).GetPhotonView();
                 
-                PlayerManager.NewPlayerSpawn(playerPhotonView.viewID, PhotonNetwork.playerName);
+                PlayerManager.NewPlayerSpawn(PhotonNetwork.playerName, PhotonNetwork.player.ID, playerPhotonView.viewID);
             }
         }        
         
