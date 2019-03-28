@@ -70,9 +70,23 @@ namespace Assets.Scripts
             {
                 //Check preemptively for collision with another entity
                 RaycastHit hit;
-                if (Physics.Raycast(transform.position, transform.forward, out hit, 1f))
+                if (Physics.Raycast(new Vector3(transform.position.x, 0.85f, transform.position.z), transform.forward, out hit, 1f))
                 {
-                    //if (hit.collider.tag)
+                    if (hit.collider.tag == "Pacman")
+                    {
+                        recentlyCollided = true;
+                        recentlyCollidedCtr = 0;
+
+                        Debug.Log("ABOUT TO COLLIDE WITH ANOTHER PACMAN");
+                        Debug.Log("Current Rotation: " + GetComponent<Rigidbody>().rotation.eulerAngles.y);
+
+                        Quaternion rotation = Quaternion.Euler(new Vector3(0, GetComponent<Rigidbody>().rotation.eulerAngles.y - 180f, 0));
+                        GetComponent<Rigidbody>().rotation = rotation;
+
+                        Debug.Log("New Rotation: " + GetComponent<Rigidbody>().rotation.eulerAngles.y);
+
+                        GetComponent<Rigidbody>().MovePosition(transform.position + transform.forward * Time.deltaTime * 5);
+                    }
                 }
 
                 ProcessInputs();                        
@@ -137,7 +151,7 @@ namespace Assets.Scripts
             //Pacman collision: Both players bounce back and rotate towards where they were coming from
             if (other.gameObject.tag == "Pacman")
             {
-                recentlyCollided = true;
+                /*recentlyCollided = true;
                 recentlyCollidedCtr = 0;
 
                 Debug.Log("COLLIDING WITH ANOTHER PACMAN");
@@ -148,7 +162,7 @@ namespace Assets.Scripts
 
                 Debug.Log("New Rotation: " + GetComponent<Rigidbody>().rotation.eulerAngles.y);
 
-                GetComponent<Rigidbody>().MovePosition(transform.position + transform.forward  * Time.deltaTime * 5);
+                GetComponent<Rigidbody>().MovePosition(transform.position + transform.forward  * Time.deltaTime * 5);*/
             }
 
             //Ghost collision: Player is kicked from the game. 
@@ -188,7 +202,7 @@ namespace Assets.Scripts
         {
             if (!isAligning)
             {
-                if (recentlyCollided && recentlyCollidedCtr < 5)
+                if (recentlyCollided && recentlyCollidedCtr < 20)
                 {
                     GetComponent<Rigidbody>().MovePosition(transform.position + transform.forward * Time.deltaTime * 5);
                     recentlyCollidedCtr++;                    
@@ -197,6 +211,7 @@ namespace Assets.Scripts
                 {
                     GetComponent<Rigidbody>().MovePosition(transform.position + transform.forward * Time.deltaTime * moveSpeed);
                     recentlyCollidedCtr = 0;
+                    recentlyCollided = false;
                 }
 
                 //Set last key pressed

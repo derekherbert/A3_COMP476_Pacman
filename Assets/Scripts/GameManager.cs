@@ -25,7 +25,7 @@ namespace Assets.Scripts
                                                       new Vector3(0f, 0f, 0f),   //Bottom-right corner
                                                       new Vector3(0f, 180f, 0f), //Top-right corner
                                                       new Vector3(0f, 0f, 0f)    //Bottom-left corner
-                                             };
+                                                    };
         public static Color[] colors = { Color.yellow,
                                          Color.green,
                                          Color.blue,
@@ -34,7 +34,14 @@ namespace Assets.Scripts
         public static int[] playerScoreTextBoxPhotonIDs = { 63, 357 };
 
         public static List<PlayerInfo> playerInfoList;
-        
+        public static Vector3[] fruitPositions = { new Vector3(0.5f, 0.5f, 0.5f),   //Middle
+                                                   new Vector3(-9.5f, 0.5f, 10.5f), //Top-left corner
+                                                   new Vector3(10.5f, 0.5f, -9.5f), //Bottom-right corner
+                                                   new Vector3(10.5f, 0.5f, 10.5f), //Top-right corner
+                                                   new Vector3(-9.5f, 0.5f, -9.5f)  //Bottom-left corner
+                                                 };
+        public static int fruitPositionCtr = 0;
+
         #endregion
 
         #region Private Variables
@@ -129,6 +136,21 @@ namespace Assets.Scripts
                     index++;
                 }
             }
+        }
+
+        public static void spawnFruit()
+        {
+            GameObject fruit = PhotonNetwork.Instantiate("Fruit", fruitPositions[fruitPositionCtr], Quaternion.identity, 0);
+
+            if (fruitPositionCtr < 4)
+            {
+                fruitPositionCtr++;
+            }
+            else
+            {
+                fruitPositionCtr = 0;
+            }
+            
         }
 
         #endregion
