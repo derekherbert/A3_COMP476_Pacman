@@ -46,4 +46,6 @@ MonoBehaviour:
   - NewPlayerSpawn
   - PelletEaten
   - NewPlayerSpawnRPC
+  - FruitEaten
+  - UpdateScore
   DisableAutoOpenWizard: 1

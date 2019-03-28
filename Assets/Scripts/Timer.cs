@@ -12,6 +12,8 @@ public class Timer : MonoBehaviour
     ExitGames.Client.Photon.Hashtable CustomValue;
     string prettyTime;
 
+    public static int timeLeft;
+
     void Start()
     {
         if (PhotonNetwork.player.IsMasterClient)
@@ -35,30 +37,29 @@ public class Timer : MonoBehaviour
         if (!startTimer) return;
 
         timerValue = (int)((float)PhotonNetwork.time - startTime);
-
-        Debug.Log("Time Left: " + timerValue);
-
+        
         PhotonView.Find(63).GetComponent<Text>().text = "Time Left : " + getPrettyTime(timerDuration - (int)timerValue);
 
         //Timer Completed
         if (timerValue >= timerDuration)
         {
             PhotonNetwork.Disconnect();
-            Debug.Log("YOU'VE BEEN DISCONNECTED");
         }
     }
 
     private string getPrettyTime(int time)
     {
-        prettyTime = (int)time / 60 + ":" + time % 60;
+        timeLeft = time;
 
-        if (time%60 == 0)
+        prettyTime = (int)time / 60 + ":";
+
+        if (time%60 < 10)
         {
             prettyTime += "0";
         }
+        
+        prettyTime += +time % 60; 
 
         return prettyTime;
-
-
     }
 }

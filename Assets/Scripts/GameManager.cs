@@ -43,6 +43,7 @@ namespace Assets.Scripts
         public static int fruitPositionCtr = 0;
 
         public static float startTime;
+        public int lastFruitSpawnTime = 180;
 
         #endregion
 
@@ -69,46 +70,32 @@ namespace Assets.Scripts
             }
         }
 
+        void Update()
+        {
+            if (PhotonNetwork.isMasterClient)
+            {
+                if (lastFruitSpawnTime != Timer.timeLeft && Timer.timeLeft % 30 == 0)
+                {
+                    lastFruitSpawnTime = Timer.timeLeft;
+                    spawnFruit();
+                }
+            }            
+        }
+
         #endregion
 
         #region Photon Messages
 
-        /// <summary>
-        /// Called when the local player left the room. We need to load the launcher scene.
-        /// </summary>
-        public override void OnLeftRoom()
-        {
-            SceneManager.LoadScene(0);
-        }
-
         public override void OnPhotonPlayerConnected(PhotonPlayer other)
         {
-            Debug.Log("OnPhotonPlayerConnected() " + other.NickName); // not seen if you're the player connecting
-
-
-            if (PhotonNetwork.isMasterClient)
-            {
-                Debug.Log("OnPhotonPlayerConnected isMasterClient " + PhotonNetwork.isMasterClient); // called before OnPhotonPlayerDisconnected
-
-
-                LoadArena();
-            }
+            
         }
 
 
         public override void OnPhotonPlayerDisconnected(PhotonPlayer other)
         {
-            Debug.Log("OnPhotonPlayerDisconnected() " + other.NickName); // seen when other disconnects
-
-
-            if (PhotonNetwork.isMasterClient)
-            {
-                Debug.Log("OnPhotonPlayerDisonnected isMasterClient " + PhotonNetwork.isMasterClient); // called before OnPhotonPlayerDisconnected
-
-
-                LoadArena();
-            }
-        }
+            
+        }        
 
         #endregion
 
@@ -125,7 +112,6 @@ namespace Assets.Scripts
         {
             if (PhotonNetwork.isMasterClient)
             {
-                GameObject samplePellet = GameObject.Find("SamplePellet");
                 GameObject parent = GameObject.Find("Pellets");
                 int index = 0;
 
@@ -141,6 +127,15 @@ namespace Assets.Scripts
 
         public static void spawnFruit()
         {
+            //Destroy previous instance (if it exists)
+            GameObject[] previousFruits = GameObject.FindGameObjectsWithTag("Fruit");
+
+            foreach (GameObject previousFruit in previousFruits)
+            {
+                PhotonNetwork.Destroy(previousFruit.GetComponent<PhotonView>());
+            }
+
+            //Spawn a new fruit
             GameObject fruit = PhotonNetwork.Instantiate("Fruit", fruitPositions[fruitPositionCtr], Quaternion.identity, 0);
 
             if (fruitPositionCtr < 4)
@@ -150,8 +145,7 @@ namespace Assets.Scripts
             else
             {
                 fruitPositionCtr = 0;
-            }
-            
+            }                        
         }
 
         #endregion
@@ -161,12 +155,10 @@ namespace Assets.Scripts
 
         void LoadArena()
         {
-            if (!PhotonNetwork.isMasterClient)
-            {
-                Debug.LogError("PhotonNetwork : Trying to Load a level but we are not the master Client");
-            }
-            Debug.Log("PhotonNetwork : Loading Level : Room");
-            PhotonNetwork.LoadLevel("Room");
+            if (PhotonNetwork.isMasterClient)
+            {                
+                PhotonNetwork.LoadLevel("Room");
+            }           
         }
 
         #endregion

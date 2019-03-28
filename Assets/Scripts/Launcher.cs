@@ -117,7 +117,6 @@ namespace Assets.Scripts
 
         public override void OnConnectedToMaster()
         {
-            Debug.Log("DemoAnimator/Launcher: OnConnectedToMaster() was called by PUN");
 
             // we don't want to do anything if we are not attempting to join a room.
             // this case where isConnecting is false is typically when you lost or quit the game, when this level is loaded, OnConnectedToMaster will be called, in that case
@@ -134,27 +133,19 @@ namespace Assets.Scripts
         {
             progressLabel.SetActive(false);
             controlPanel.SetActive(true);
-            Debug.LogWarning("DemoAnimator/Launcher: OnDisconnectedFromPhoton() was called by PUN");
         }
 
         public override void OnPhotonRandomJoinFailed(object[] codeAndMsg)
         {
-            Debug.Log("DemoAnimator/Launcher:OnPhotonRandomJoinFailed() was called by PUN. No random room available, so we create one.\nCalling: PhotonNetwork.CreateRoom(null, new RoomOptions() {maxPlayers = 4}, null);");
-
             // #Critical: we failed to join a random room, maybe none exists or they are all full. No worries, we create a new room.
             PhotonNetwork.CreateRoom(null, new RoomOptions() { MaxPlayers = MaxPlayersPerRoom }, null);
         }
 
         public override void OnJoinedRoom()
         {
-            Debug.Log("DemoAnimator/Launcher: OnJoinedRoom() called by PUN. Now this client is in a room.");
-
             // #Critical: We only load if we are the first player, else we rely on  PhotonNetwork.automaticallySyncScene to sync our instance scene.
             if (PhotonNetwork.room.PlayerCount == 1)
             {
-                Debug.Log("We load the 'Room' ");
-
-
                 // #Critical
                 // Load the Room Level.
                 PhotonNetwork.LoadLevel("Room");

@@ -65,7 +65,15 @@ namespace Assets.Scripts
         /// MonoBehaviour method called on GameObject by Unity on every frame.
         /// </summary>
         void Update()
-        {            
+        {     
+            if (PhotonNetwork.isMasterClient)
+            {
+                if (GameObject.FindGameObjectsWithTag("Pellet").Length == 0)
+                {
+                    GameManager.addPellets();
+                }
+            }
+
             if (photonView.isMine)
             {
                 //Check preemptively for collision with another entity
@@ -77,13 +85,8 @@ namespace Assets.Scripts
                         recentlyCollided = true;
                         recentlyCollidedCtr = 0;
 
-                        Debug.Log("ABOUT TO COLLIDE WITH ANOTHER PACMAN");
-                        Debug.Log("Current Rotation: " + GetComponent<Rigidbody>().rotation.eulerAngles.y);
-
                         Quaternion rotation = Quaternion.Euler(new Vector3(0, GetComponent<Rigidbody>().rotation.eulerAngles.y - 180f, 0));
                         GetComponent<Rigidbody>().rotation = rotation;
-
-                        Debug.Log("New Rotation: " + GetComponent<Rigidbody>().rotation.eulerAngles.y);
 
                         GetComponent<Rigidbody>().MovePosition(transform.position + transform.forward * Time.deltaTime * 5);
                     }
@@ -108,7 +111,7 @@ namespace Assets.Scripts
 
             //Set player number
             playerNumber = PhotonNetwork.playerList.Length - 1;
-
+                        
             //Set player's color
             playerView.GetComponent<Renderer>().material.color = GameManager.colors[playerNumber];
             this.playerColor = GameManager.colors[playerNumber];
@@ -128,12 +131,28 @@ namespace Assets.Scripts
         [PunRPC]
         void PelletEaten(int pelletViewID, PhotonMessageInfo info)
         {
-            if (PhotonNetwork.isMasterClient)
+            if (PhotonNetwork.isMasterClient && PhotonView.Find(pelletViewID) != null)
             {
-                Debug.Log("IN PELLET EATENNNNNNNNN: " + PhotonView.Find(pelletViewID).gameObject.name);
-
                 PhotonNetwork.Destroy(PhotonView.Find(pelletViewID));
             }            
+        }
+
+        [PunRPC]
+        void FruitEaten(int fruitViewID, PhotonMessageInfo info)
+        {
+            if (PhotonNetwork.isMasterClient && PhotonView.Find(fruitViewID) != null)
+            {
+                PhotonNetwork.Destroy(PhotonView.Find(fruitViewID));
+            }
+        }
+
+        [PunRPC]
+        void UpdateScore(int textBoxViewID, string text, PhotonMessageInfo info)
+        {
+            if (PhotonView.Find(textBoxViewID) != null)
+            {
+                PhotonView.Find(textBoxViewID).GetComponent<Text>().text = text;
+            }
         }
 
         /// <summary>
@@ -153,20 +172,28 @@ namespace Assets.Scripts
             {
                 recentlyCollided = true;
                 recentlyCollidedCtr = 0;
-
-                Debug.Log("COLLIDING WITH ANOTHER PACMAN");
-                Debug.Log("Current Rotation: " + GetComponent<Rigidbody>().rotation.eulerAngles.y);
-
+                                
                 Quaternion rotation = Quaternion.Euler(new Vector3(0, - GetComponent<Rigidbody>().rotation.eulerAngles.y, 0));
                 GetComponent<Rigidbody>().rotation = rotation;
-
-                Debug.Log("New Rotation: " + GetComponent<Rigidbody>().rotation.eulerAngles.y);
-                                
-
+                                     
                 GetComponent<Rigidbody>().MovePosition(transform.position + transform.forward  * Time.deltaTime * 4);
 
                 isAligning = true;
                 alignPlayer();
+            }
+
+            else if (other.gameObject.tag == "Fruit")
+            {                
+                photonView.RPC("FruitEaten", PhotonTargets.MasterClient, other.GetComponent<PhotonView>().viewID);
+
+                //Destroy all previous pellets
+                foreach (GameObject pellet in GameObject.FindGameObjectsWithTag("Pellet"))
+                {
+                    PhotonNetwork.Destroy(pellet.GetComponent<PhotonView>());
+                }
+
+                //Spawn new pellets
+                GameManager.addPellets();
             }
 
             //Ghost collision: Player is kicked from the game. 
@@ -184,12 +211,11 @@ namespace Assets.Scripts
 
                     PhotonNetwork.player.AddScore(1);
 
-                    Debug.Log("Local player score: " + PhotonNetwork.player.GetScore());
-
                     pelletBeingDestroyed = other.gameObject;
 
                     //Update score on UI
-                    PhotonView.Find(GameManager.playerScoreTextBoxPhotonIDs[playerNumber]).GetComponent<Text>().text = PhotonNetwork.player.NickName + ": " + PhotonNetwork.player.GetScore();
+                    photonView.RPC("UpdateScore", PhotonTargets.All, GameManager.playerScoreTextBoxPhotonIDs[playerNumber], PhotonNetwork.player.NickName + ": " + PhotonNetwork.player.GetScore());
+                    //PhotonView.Find(GameManager.playerScoreTextBoxPhotonIDs[playerNumber]).GetComponent<Text>().text = PhotonNetwork.player.NickName + ": " + PhotonNetwork.player.GetScore();
 
                 }
             }
