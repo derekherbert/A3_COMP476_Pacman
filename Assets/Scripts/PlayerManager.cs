@@ -33,7 +33,8 @@ namespace Assets.Scripts
         private float rotation = 0.0f;
         private GameObject pelletBeingDestroyed;
         private int playerNumber;
-        private Color playerColor, syncColor, tempColor;
+        private Color playerColor, syncColor;
+        private Vector3 tempColor;
 
         #endregion
 
@@ -65,16 +66,16 @@ namespace Assets.Scripts
         /// </summary>
         void Update()
         {
-            if (!OnPhotonSerializeView.isMine)
+            if (!photonView.isMine)
             {
-                gameObject.renderer.material.color = synccolor;
+                GetComponent<Renderer>().material.color = syncColor;
                 return;
             }
 
             if (photonView.isMine)
             {
                 //Update color
-                playerView.GetComponent<Renderer>().material.color = this.playerColor;
+                GetComponent<Renderer>().material.color = this.playerColor;
 
                 ProcessInputs();                        
             }
@@ -602,16 +603,16 @@ namespace Assets.Scripts
             if (stream.isWriting)
             {
                 //send color
-                tempcolor = new Vector3(gameObject.renderer.material.color.r, gameObject.renderer.material.color.g, gameObject.renderer.material.color.b);
+                tempColor = new Vector3(GetComponent<Renderer>().material.color.r, GetComponent<Renderer>().material.color.g, GetComponent<Renderer>().material.color.b);
 
-                stream.Serialize(ref tempcolor);
+                stream.Serialize(ref tempColor);
             }
             else
             {
                 //get color
-                stream.Serialize(ref tempcolor);
+                stream.Serialize(ref tempColor);
 
-                synccolor = new Color(tempcolor.x, tempcolor.y, tempcolor.z, 1.0f);
+                syncColor = new Color(tempColor.x, tempColor.y, tempColor.z, 1.0f);
 
             }
 
