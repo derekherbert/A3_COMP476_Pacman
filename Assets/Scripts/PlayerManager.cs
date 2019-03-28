@@ -68,7 +68,7 @@ namespace Assets.Scripts
         {
             if (!photonView.isMine)
             {
-                GetComponent<Renderer>().material.color = syncColor;
+                photonView.GetComponent<Renderer>().material.color = syncColor;
                 return;
             }
 
@@ -603,7 +603,7 @@ namespace Assets.Scripts
             if (stream.isWriting)
             {
                 //send color
-                tempColor = new Vector3(GetComponent<Renderer>().material.color.r, GetComponent<Renderer>().material.color.g, GetComponent<Renderer>().material.color.b);
+                tempColor = new Vector3(playerColor.r, playerColor.g, playerColor.b);
 
                 stream.Serialize(ref tempColor);
             }
