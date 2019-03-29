@@ -18,16 +18,16 @@ public class GhostManager : Photon.PunBehaviour
 
     private bool isRotating = false;
     private bool isAligning = false;
+    private bool isRotatingToStartingNode = false;
+    private bool isOriented = false;
     private Vector3 currentDirection;    
-    private Node nodeInFront, north, south, east, west;
+    private Node nodeInFront, northEast, northWest, southEast, southWest;
     private float rotation = 0.0f;
     private GameObject pelletBeingDestroyed;
     List<Node> path;
     GameObject targetPlayer;
-    private int ctr = 100;
 
-    AStar aStar;
-    
+    AStar aStar;    
 
     #endregion
 
@@ -40,195 +40,258 @@ public class GhostManager : Photon.PunBehaviour
     // Update is called once per frame
     void Update()
     {
-        //Update every 100 calls to Update()
-        if (ctr++ > 100)
-        {
-            ctr = 0;
-            
-            //Find closest player
-            foreach (GameObject player in GameObject.FindGameObjectsWithTag("Pacman"))
-            {
-                if (targetPlayer == null || Vector3.Distance(transform.position, player.transform.position) < Vector3.Distance(transform.position, player.transform.position))
-                {
-                    targetPlayer = player;
-                }
-            }
+        Debug.Log("In Update()");
 
-            //Find shortest path to closest player
-            path = aStar.GetPath(transform.position, targetPlayer.transform.position, Heuristic.EUCLIDIAN);
+        foreach (GameObject player in GameObject.FindGameObjectsWithTag("Pacman"))
+        {
+            if (targetPlayer == null || Vector3.Distance(transform.position, player.transform.position) < Vector3.Distance(transform.position, player.transform.position))
+            {
+                targetPlayer = player;
+            }
         }
 
-        if (!isAligning)
+        //Find shortest path to closest player
+        path = aStar.GetPath(transform.position, targetPlayer.transform.position, Heuristic.EUCLIDIAN);
+
+        Debug.Log("AStar Path Length: " + path.Count);
+        Debug.Log("path[0] = " + path[0].Index + "\tpath[1] = " + path[1].Index);
+                
+        //Find node in front of player
+        RaycastHit hit;
+        Vector3 nodePostion = new Vector3(this.gameObject.transform.position.x, 5.0f, this.gameObject.transform.position.z);
+
+        /*if (Physics.Raycast(nodePostion, transform.forward, out hit, 1f))
         {
+            if (hit.collider.gameObject.tag == "Node")
+            {
+                int index = Convert.ToInt32(hit.collider.gameObject.name.Substring(5));
+
+                Debug.Log("Node In Front of Player = " + index);
+
+                if (index != path[0].Index)
+                {
+                    Debug.Log("Start rotating player to starting node");
+
+                    //Turn around to face the first node in the path if not already facing it
+                    isRotatingToStartingNode = true;
+                    rotateToStartingNode(path[0]);
+                }
+            }
+        }*/
+
+        if (!isAligning && !isRotating && !isRotatingToStartingNode)
+        {
+            Debug.Log("START MOVING THERE EH BUDDY");
             GetComponent<Rigidbody>().MovePosition(transform.position + transform.forward * Time.deltaTime * moveSpeed);
 
-            //Find node in front of player
-            RaycastHit hit;
-            Vector3 nodePostion = new Vector3(this.gameObject.transform.position.x, 5.0f, this.gameObject.transform.position.z);
-
-            if (!isRotating)
+            if (Physics.Raycast(nodePostion, transform.forward, out hit, 1f))
             {
-                if (Physics.Raycast(nodePostion, transform.forward, out hit, 1f))
+                //Node in front of player
+                if (hit.collider.gameObject.tag == "Node")
                 {
-                    //Node in front of player
-                    if (hit.collider.gameObject.tag == "Node")
+                    int index = Convert.ToInt32(hit.collider.gameObject.name.Substring(5));
+
+
+                    Debug.Log("The Raycast Hit Node " + index);
+
+
+                    bool differentNode = false;
+                    float distanceToNode = hit.distance;
+                    if (nodeInFront == null || nodeInFront.Index != TileGenerator.Graph.Nodes[index].Index)
                     {
-                        int index = Convert.ToInt32(hit.collider.gameObject.name.Substring(5));
-                        bool differentNode = false;
-                        float distanceToNode = hit.distance;
-                        if (nodeInFront == null || nodeInFront.Index != TileGenerator.Graph.Nodes[index].Index)
+                        nodeInFront = TileGenerator.Graph.Nodes[index];
+                        differentNode = true;
+                    }
+
+                    if (differentNode || distanceToNode < 0.5f)
+                    {
+                        Debug.Log("START CASTING RAYZZZZZZ");
+
+                        //Reset everything
+                        northEast = null;
+                        northWest = null;
+                        southEast = null;
+                        southWest = null;
+
+                        //Raycast northEast
+                        if (Physics.Raycast(nodeInFront.GameObject.transform.position, new Vector3(1, 0, 1), out hit, 1.5f))
                         {
-                            nodeInFront = TileGenerator.Graph.Nodes[index];
-                            differentNode = true;
+                            if (hit.collider.gameObject.tag == "Node")
+                            {
+                                index = Convert.ToInt32(hit.collider.gameObject.name.Substring(5));
+                                if (index == path[1].Index)
+                                {
+                                    northEast = path[1];
+                                }
+                            }
+                        }
+                        //Raycast northWest
+                        if (Physics.Raycast(nodeInFront.GameObject.transform.position, new Vector3(-1, 0, 1), out hit, 1.5f))
+                        {
+                            if (hit.collider.gameObject.tag == "Node")
+                            {
+                                index = Convert.ToInt32(hit.collider.gameObject.name.Substring(5));
+                                if (index == path[1].Index)
+                                {
+                                    northWest = path[1];
+                                }
+                            }
+                        }
+                        //Raycast southEast
+                        if (Physics.Raycast(nodeInFront.GameObject.transform.position, new Vector3(1, 0, -1), out hit, 1.5f))
+                        {
+                            if (hit.collider.gameObject.tag == "Node")
+                            {
+                                index = Convert.ToInt32(hit.collider.gameObject.name.Substring(5));
+                                if (index == path[1].Index)
+                                {
+                                    southEast = path[1];
+                                }
+                            }
+                        }
+                        //Raycast southWest
+                        if (Physics.Raycast(nodeInFront.GameObject.transform.position, new Vector3(-1, 0, -1), out hit, 1.5f))
+                        {
+                            if (hit.collider.gameObject.tag == "Node")
+                            {
+                                index = Convert.ToInt32(hit.collider.gameObject.name.Substring(5));
+                                if (index == path[1].Index)
+                                {
+                                    southWest = path[1];
+                                }
+                            }
                         }
 
-                        if (differentNode || distanceToNode < 0.5f)
+                        if (northEast == null) Debug.Log("northEast: " + northEast); else Debug.Log("northEast: " + northEast.Index);
+                        if (northWest == null) Debug.Log("northWest: " + northWest); else Debug.Log("northWest: " + northWest.Index);
+                        if (southEast == null) Debug.Log("southEast: " + southEast); else Debug.Log("southEast: " + southEast.Index);
+                        if (southWest == null) Debug.Log("southWest: " + southWest); else Debug.Log("southWest: " + southWest.Index);
+
+                        //User facing south
+                        if (transform.forward.z < -0.98 && transform.forward.z > -1.02)
                         {
-                            //Reset everything
-                            north = null;
-                            south = null;
-                            east = null;
-                            west = null;
+                            Debug.Log("HEADING OUT WEST BABY");
 
-                            //Raycast north
-                            if (Physics.Raycast(nodeInFront.GameObject.transform.position, new Vector3(0, 0, 1), out hit, 1f))
+                            //Check if next turn is west
+                            if (southWest != null)
                             {
-                                if (hit.collider.gameObject.tag == "Node")
-                                {
-                                    index = Convert.ToInt32(hit.collider.gameObject.name.Substring(5));
-                                    north = TileGenerator.Graph.Nodes[index];
-                                }
+                                rotation = 90;
+                                rotationSpeed = 5;
+                                currentDirection = transform.forward;
+                                isRotating = true;
                             }
-                            //Raycast south
-                            if (Physics.Raycast(nodeInFront.GameObject.transform.position, new Vector3(0, 0, -1), out hit, 1f))
+                            //Check if next turn is east
+                            else if (southEast != null)
                             {
-                                if (hit.collider.gameObject.tag == "Node")
-                                {
-                                    index = Convert.ToInt32(hit.collider.gameObject.name.Substring(5));
-                                    south = TileGenerator.Graph.Nodes[index];
-                                }
-                            }
-                            //Raycast east
-                            if (Physics.Raycast(nodeInFront.GameObject.transform.position, new Vector3(1, 0, 0), out hit, 1f))
-                            {
-                                if (hit.collider.gameObject.tag == "Node")
-                                {
-                                    index = Convert.ToInt32(hit.collider.gameObject.name.Substring(5));
-                                    east = TileGenerator.Graph.Nodes[index];
-                                }
-                            }
-                            //Raycast west
-                            if (Physics.Raycast(nodeInFront.GameObject.transform.position, new Vector3(-1, 0, 0), out hit, 1f))
-                            {
-                                if (hit.collider.gameObject.tag == "Node")
-                                {
-                                    index = Convert.ToInt32(hit.collider.gameObject.name.Substring(5));
-                                    west = TileGenerator.Graph.Nodes[index];
-                                }
+                                rotation = -90;
+                                rotationSpeed = 5;
+                                currentDirection = transform.forward;
+                                isRotating = true;
                             }
 
-
-                            //Wall ahead
-                            if (hit.collider.gameObject.tag == "Wall")
+                            
+                        }
+                        //User facing north
+                        else if (transform.forward.z > 0.98 && transform.forward.z < 1.02)
+                        {
+                            //Check if next turn is west
+                            if (northWest != null)
                             {
-                                //User facing south
-                                if (transform.forward.z < -0.98 && transform.forward.z > -1.02)
-                                {
-                                    //Invalid or no user input, turn automatically (west by default)
-                                    if (west != null)
-                                    {
-                                        rotation = 90;
-                                        rotationSpeed = 5;
-                                    }
-                                    //Turn right automatically if can't turn left
-                                    else if (east != null)
-                                    {
-                                        rotation = -90;
-                                        rotationSpeed = 5;
-                                    }
-
-                                    currentDirection = transform.forward;
-                                    isRotating = true;
-                                }
-                                //User facing north
-                                else if (transform.forward.z > 0.98 && transform.forward.z < 1.02)
-                                {
-                                    if (west != null)
-                                    {
-                                        rotation = -90;
-                                        rotationSpeed = 5;
-                                    }
-                                    //Turn right automatically if can't turn east
-                                    else if (east != null)
-                                    {
-                                        rotation = 90;
-                                        rotationSpeed = 5;
-                                    }
-
-                                    currentDirection = transform.forward;
-                                    isRotating = true;
-                                }
-                                //User facing west
-                                else if (transform.forward.x < -0.98 && transform.forward.x > -1.02)
-                                {
-                                    if (north != null)
-                                    {
-                                        rotation = 90;
-                                        rotationSpeed = 5;
-                                    }
-                                    //Turn right automatically if can't turn left
-                                    else if (south != null)
-                                    {
-                                        rotation = -90;
-                                        rotationSpeed = 5;
-                                    }
-
-                                    currentDirection = transform.forward;
-                                    isRotating = true;
-                                }
-                                //User facing east
-                                else if (transform.forward.x > 0.98 && transform.forward.x < 1.02)
-                                {
-                                    if (north != null)
-                                    {
-                                        rotation = -90;
-                                        rotationSpeed = 5;
-                                    }
-                                    //Turn south automatically if can't turn north
-                                    else if (south != null)
-                                    {
-                                        rotation = 90;
-                                        rotationSpeed = 5;
-                                    }
-
-                                    currentDirection = transform.forward;
-                                    isRotating = true;
-                                }
+                                rotation = -90;
+                                rotationSpeed = 5;
+                                currentDirection = transform.forward;
+                                isRotating = true;
+                            }
+                            //Check if next turn is east
+                            else if (northEast != null)
+                            {
+                                rotation = 90;
+                                rotationSpeed = 5;
+                                currentDirection = transform.forward;
+                                isRotating = true;
+                            }
+                        }
+                        //User facing west
+                        else if (transform.forward.x < -0.98 && transform.forward.x > -1.02)
+                        {
+                            //Check if next turn is north
+                            if (northWest != null)
+                            {
+                                rotation = 90;
+                                rotationSpeed = 5;
+                                currentDirection = transform.forward;
+                                isRotating = true;
+                            }
+                            //Check if next turn is south
+                            else if (southWest != null)
+                            {
+                                rotation = -90;
+                                rotationSpeed = 5;
+                                currentDirection = transform.forward;
+                                isRotating = true;
+                            }
+                        }
+                        //User facing east
+                        else if (transform.forward.x > 0.98 && transform.forward.x < 1.02)
+                        {
+                            //Check if next turn is north
+                            if (northEast != null)
+                            {
+                                rotation = -90;
+                                rotationSpeed = 5;
+                                currentDirection = transform.forward;
+                                isRotating = true;
+                            }
+                            //Check if next turn is south
+                            else if (southEast != null)
+                            {
+                                rotation = 90;
+                                rotationSpeed = 5;
+                                currentDirection = transform.forward;
+                                isRotating = true;
                             }
                         }
                     }
                 }
             }
+        }
 
-            if (isAligning)
+        if (isAligning)
+        {
+            alignPlayer();
+        }
+
+        if (isRotating)
+        {
+            if (Mathf.Abs(Vector3.Angle(currentDirection.normalized, transform.forward.normalized)) <= 90)
             {
+                rotatePlayer(rotation, rotationSpeed);
+            }
+            else
+            {
+                isRotating = false;
+
+                isAligning = true;
                 alignPlayer();
             }
+        }
+    }
 
-            if (isRotating)
-            {
-                if (Mathf.Abs(Vector3.Angle(currentDirection.normalized, transform.forward.normalized)) <= 90)
-                {
-                    rotatePlayer(rotation, rotationSpeed);
-                }
-                else
-                {
-                    isRotating = false;
+    private void rotateToStartingNode(Node node)
+    {
+        Vector3 targetDir = node.GameObject.transform.position - transform.position;
 
-                    isAligning = true;
-                    alignPlayer();
-                }
-            }
+        Vector3 newDir = Vector3.RotateTowards(transform.forward, targetDir, rotationSpeed * Time.deltaTime, 0.0f);
+        //Debug.DrawRay(transform.position, newDir, Color.red);
+
+        // Move our position a step closer to the target.
+        transform.rotation = Quaternion.LookRotation(newDir);
+
+        if (Vector3.Angle(node.GameObject.transform.position, transform.forward) < 0.01f)
+        {
+            isRotatingToStartingNode = false;
+            isAligning = true;
+            alignPlayer();
         }
     }
 
