@@ -20,6 +20,9 @@ public class AStar
 
     public List<Node> GetPath(Node startNode, Node endNode, Heuristic heuristic)
     {
+        closedList.Clear();
+        openList.Clear();
+
         //Create the first entry in the openList
         openList.Add(new OpenListItem(startNode, 0.0f, new List<Node>(), getEstimatedCostSoFar(startNode, endNode, heuristic)));
         OpenListItem currentItem, childItem;

@@ -59,26 +59,7 @@ public class GhostManager : Photon.PunBehaviour
         //Find node in front of player
         RaycastHit hit;
         Vector3 nodePostion = new Vector3(this.gameObject.transform.position.x, 5.0f, this.gameObject.transform.position.z);
-
-        /*if (Physics.Raycast(nodePostion, transform.forward, out hit, 1f))
-        {
-            if (hit.collider.gameObject.tag == "Node")
-            {
-                int index = Convert.ToInt32(hit.collider.gameObject.name.Substring(5));
-
-                Debug.Log("Node In Front of Player = " + index);
-
-                if (index != path[0].Index)
-                {
-                    Debug.Log("Start rotating player to starting node");
-
-                    //Turn around to face the first node in the path if not already facing it
-                    isRotatingToStartingNode = true;
-                    rotateToStartingNode(path[0]);
-                }
-            }
-        }*/
-
+        
         if (!isAligning && !isRotating && !isRotatingToStartingNode)
         {
             Debug.Log("START MOVING THERE EH BUDDY");
@@ -275,6 +256,33 @@ public class GhostManager : Photon.PunBehaviour
                 alignPlayer();
             }
         }
+    }
+
+    private bool followAStarPath()
+    {
+        /*if (path.Count > 0 && path[0] != null && currentNode != path[0])
+        {
+            currentNode = path[0];
+        }
+
+        //This is ugly.... but it works...
+        GameObject tempGameObject = new GameObject();
+        Transform tempTransform = tempGameObject.transform;
+        tempTransform.position = transform.position;
+        tempTransform.rotation = transform.rotation;
+        tempTransform.LookAt(currentNode.GameObject.transform.position);
+        Quaternion endRotation = tempTransform.rotation;
+
+        transform.rotation = Quaternion.Lerp(transform.rotation, endRotation, rotationSpeed * Time.deltaTime);
+        transform.position += transform.forward * speed * Time.deltaTime;
+
+        if (path.Count == 1 && Vector3.Distance(transform.position, path[path.Count - 1].GameObject.transform.position) < 0.5f)
+        {
+            hasArrived = true;
+            return true;
+        }*/
+
+        return false;
     }
 
     private void rotateToStartingNode(Node node)

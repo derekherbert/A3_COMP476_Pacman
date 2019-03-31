@@ -16,9 +16,13 @@ namespace Assets.Scripts
         
         public static string playerName;
         public float moveSpeed = 2.0f;
-        public float rotationSpeed = 3;
+        public float rotationSpeed = 2;
         public bool recentlyCollided = false;
         public int recentlyCollidedCtr = 0;
+        public float NORMAL_MOVE_SPEED = 2.0f;
+        public float POWER_MOVE_SPEED = 3.0f;
+        public float NORMAL_ROTATION_SPEED = 1.5f;
+        public float POWER_ROTATION_SPEED = 2f;
 
         #endregion
 
@@ -34,6 +38,10 @@ namespace Assets.Scripts
         private int playerNumber;
         private Color playerColor, syncColor;
         private Vector3 tempColor;
+        private bool inPowerMode;
+        private float powerModeCtr;
+        private int colorSpammer = 0;
+        private Color powerColor = Color.black;
 
         #endregion
 
@@ -83,6 +91,26 @@ namespace Assets.Scripts
                         GetComponent<Rigidbody>().rotation = rotation;
 
                         GetComponent<Rigidbody>().MovePosition(transform.position + transform.forward * Time.deltaTime * 5);
+                    }
+                }
+
+                //Check for power mode
+                if (inPowerMode)
+                {
+                    if (powerModeCtr < 8f)
+                    {
+                        powerModeCtr += Time.deltaTime;
+                        photonView.RPC("InPowerMode", PhotonTargets.All, GetComponent<PhotonView>().viewID);
+                        moveSpeed = POWER_MOVE_SPEED;
+                        rotationSpeed = POWER_ROTATION_SPEED;
+                    }
+                    else
+                    {
+                        inPowerMode = false;
+                        powerModeCtr = 0f;
+                        photonView.RPC("FinishedPowerMode", PhotonTargets.All, GetComponent<PhotonView>().viewID);
+                        moveSpeed = NORMAL_MOVE_SPEED;
+                        rotationSpeed = NORMAL_ROTATION_SPEED;
                     }
                 }
 
@@ -141,12 +169,61 @@ namespace Assets.Scripts
         }
 
         [PunRPC]
+        void PowerPelletEaten(int powerPelletViewID, PhotonMessageInfo info)
+        {
+            if (PhotonNetwork.isMasterClient && PhotonView.Find(powerPelletViewID) != null)
+            {
+                PhotonNetwork.Destroy(PhotonView.Find(powerPelletViewID));
+            }
+        }
+
+        [PunRPC]
+        void InPowerMode(int playerViewID, PhotonMessageInfo info)
+        {
+            PhotonView powerPlayer = PhotonView.Find(playerViewID);
+
+            colorSpammer++;
+
+            if (colorSpammer % 20 == 0)
+            {
+                if (powerColor == Color.black)
+                {
+                    powerColor = Color.white;
+                }
+                else
+                {
+                    powerColor = Color.black;
+                }
+
+                powerPlayer.GetComponent<Renderer>().material.color = powerColor;
+            }
+                
+        }
+
+        [PunRPC]
+        void FinishedPowerMode(int playerViewID, PhotonMessageInfo info)
+        {
+            PhotonView powerPlayer = PhotonView.Find(playerViewID);
+
+            powerPlayer.GetComponent<Renderer>().material.color = GameManager.colors[playerNumber];
+        }
+
+        [PunRPC]
         void UpdateScore(int textBoxViewID, string text, PhotonMessageInfo info)
         {
             if (PhotonView.Find(textBoxViewID) != null)
             {
                 PhotonView.Find(textBoxViewID).GetComponent<Text>().text = text;
             }
+        }
+
+        [PunRPC]
+        void KickPlayer(int playerID, PhotonMessageInfo info)
+        {
+            if (PhotonNetwork.isMasterClient && PhotonView.Find(playerID) != null)
+            {
+                PhotonNetwork.CloseConnection(PhotonPlayer.Find(playerID));
+            }            
         }
 
         /// <summary>
@@ -174,6 +251,11 @@ namespace Assets.Scripts
 
                 isAligning = true;
                 alignPlayer();
+
+                if (inPowerMode)
+                {
+                    photonView.RPC("KickPlayer", PhotonTargets.MasterClient, other.GetComponent<PhotonView>().owner.ID);
+                }
             }
 
             else if (other.gameObject.tag == "Fruit")
@@ -188,6 +270,14 @@ namespace Assets.Scripts
 
                 //Spawn new pellets
                 GameManager.addPellets();
+            }
+
+            else if (other.gameObject.tag == "PowerPellet")
+            {
+                photonView.RPC("PowerPelletEaten", PhotonTargets.MasterClient, other.GetComponent<PhotonView>().viewID);
+
+                //Power mode
+                inPowerMode = true;
             }
 
             //Ghost collision: Player is kicked from the game. 

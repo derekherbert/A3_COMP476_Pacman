@@ -48,4 +48,8 @@ MonoBehaviour:
   - NewPlayerSpawnRPC
   - FruitEaten
   - UpdateScore
+  - PowerPelletEaten
+  - FinishedPowerMode
+  - InPowerMode
+  - KickPlayer
   DisableAutoOpenWizard: 1

@@ -41,9 +41,11 @@ namespace Assets.Scripts
                                                    new Vector3(-9.5f, 0.5f, -9.5f)  //Bottom-left corner
                                                  };
         public static int fruitPositionCtr = 0;
+        public static int powerPelletPositionCtr = 4;
 
         public static float startTime;
         public int lastFruitSpawnTime = 180;
+        public int lastPowerPelletSpawnTime = 180;
 
         #endregion
 
@@ -85,6 +87,13 @@ namespace Assets.Scripts
                 {
                     lastFruitSpawnTime = Timer.timeLeft;
                     spawnFruit();
+                }
+
+                if (lastPowerPelletSpawnTime != Timer.timeLeft && Timer.timeLeft % 10 == 0)
+                {
+                    Debug.Log("SPAWN A POWER PELLET");
+                    lastPowerPelletSpawnTime = Timer.timeLeft;
+                    spawnPowerPellet();
                 }
             }            
         }
@@ -153,6 +162,29 @@ namespace Assets.Scripts
             {
                 fruitPositionCtr = 0;
             }                        
+        }
+
+        public static void spawnPowerPellet()
+        {
+            //Destroy previous instance (if it exists)
+            GameObject[] previousPowerPellets = GameObject.FindGameObjectsWithTag("PowerPellet");
+
+            foreach (GameObject previousPowerPellet in previousPowerPellets)
+            {
+                PhotonNetwork.Destroy(previousPowerPellet.GetComponent<PhotonView>());
+            }
+
+            //Spawn a new powerPellet
+            GameObject powerPellet = PhotonNetwork.Instantiate("PowerPellet", fruitPositions[fruitPositionCtr], Quaternion.identity, 0);
+
+            if (powerPelletPositionCtr > 0)
+            {
+                powerPelletPositionCtr--;
+            }
+            else
+            {
+                powerPelletPositionCtr = 4;
+            }
         }
 
         #endregion
