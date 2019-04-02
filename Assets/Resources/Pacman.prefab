@@ -11,7 +11,6 @@ GameObject:
   - component: {fileID: 357068607172308514}
   - component: {fileID: 357068607172308519}
   - component: {fileID: 357068607172308512}
-  - component: {fileID: 357068607172308513}
   m_Layer: 0
   m_Name: Tongue
   m_TagString: Untagged
@@ -78,19 +77,6 @@ MeshRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
---- !u!135 &357068607172308513
-SphereCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 357068607172308515}
-  m_Material: {fileID: 0}
-  m_IsTrigger: 0
-  m_Enabled: 1
-  serializedVersion: 2
-  m_Radius: 0.5
-  m_Center: {x: 0, y: 0, z: 0}
 --- !u!1 &357068607268860011
 GameObject:
   m_ObjectHideFlags: 0
@@ -102,7 +88,6 @@ GameObject:
   - component: {fileID: 357068607268860010}
   - component: {fileID: 357068607268860015}
   - component: {fileID: 357068607268860008}
-  - component: {fileID: 357068607268860009}
   m_Layer: 0
   m_Name: RightEye
   m_TagString: Untagged
@@ -170,19 +155,6 @@ MeshRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
---- !u!135 &357068607268860009
-SphereCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 357068607268860011}
-  m_Material: {fileID: 0}
-  m_IsTrigger: 0
-  m_Enabled: 1
-  serializedVersion: 2
-  m_Radius: 0.5
-  m_Center: {x: 0, y: 0, z: 0}
 --- !u!1 &357068607405771112
 GameObject:
   m_ObjectHideFlags: 0
@@ -398,11 +370,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3a8fb8f9a65dfe94ea63a08bfa58eba1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  startingPosition: {x: 0, y: 0, z: 0}
   moveSpeed: 2
   rotationSpeed: 100
   recentlyCollided: 0
   recentlyCollidedCtr: 0
+  NORMAL_MOVE_SPEED: 2
+  POWER_MOVE_SPEED: 3
+  NORMAL_ROTATION_SPEED: 1.5
+  POWER_ROTATION_SPEED: 2
 --- !u!54 &7160739848000823238
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -430,7 +405,6 @@ GameObject:
   - component: {fileID: 357068607514511190}
   - component: {fileID: 357068607514511147}
   - component: {fileID: 357068607514511188}
-  - component: {fileID: 357068607514511189}
   m_Layer: 0
   m_Name: Mouth
   m_TagString: Untagged
@@ -498,19 +472,6 @@ MeshRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
---- !u!135 &357068607514511189
-SphereCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 357068607514511191}
-  m_Material: {fileID: 0}
-  m_IsTrigger: 0
-  m_Enabled: 1
-  serializedVersion: 2
-  m_Radius: 0.5
-  m_Center: {x: 0, y: 0, z: 0}
 --- !u!1 &357068607697553439
 GameObject:
   m_ObjectHideFlags: 0
@@ -522,7 +483,6 @@ GameObject:
   - component: {fileID: 357068607697553438}
   - component: {fileID: 357068607697553427}
   - component: {fileID: 357068607697553436}
-  - component: {fileID: 357068607697553437}
   m_Layer: 0
   m_Name: Pupil
   m_TagString: Untagged
@@ -589,19 +549,6 @@ MeshRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
---- !u!135 &357068607697553437
-SphereCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 357068607697553439}
-  m_Material: {fileID: 0}
-  m_IsTrigger: 0
-  m_Enabled: 1
-  serializedVersion: 2
-  m_Radius: 0.5
-  m_Center: {x: 0, y: 0, z: 0}
 --- !u!1 &357068608054361169
 GameObject:
   m_ObjectHideFlags: 0
@@ -613,7 +560,6 @@ GameObject:
   - component: {fileID: 357068608054361168}
   - component: {fileID: 357068608054361173}
   - component: {fileID: 357068608054361174}
-  - component: {fileID: 357068608054361175}
   m_Layer: 0
   m_Name: LeftEye
   m_TagString: Untagged
@@ -681,19 +627,6 @@ MeshRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
---- !u!135 &357068608054361175
-SphereCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 357068608054361169}
-  m_Material: {fileID: 0}
-  m_IsTrigger: 0
-  m_Enabled: 1
-  serializedVersion: 2
-  m_Radius: 0.5
-  m_Center: {x: 0, y: 0, z: 0}
 --- !u!1 &357068608679358064
 GameObject:
   m_ObjectHideFlags: 0
@@ -705,7 +638,6 @@ GameObject:
   - component: {fileID: 357068608679358071}
   - component: {fileID: 357068608679358068}
   - component: {fileID: 357068608679358069}
-  - component: {fileID: 357068608679358070}
   m_Layer: 0
   m_Name: Pupil
   m_TagString: Untagged
@@ -772,16 +704,3 @@ MeshRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
---- !u!135 &357068608679358070
-SphereCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 357068608679358064}
-  m_Material: {fileID: 0}
-  m_IsTrigger: 0
-  m_Enabled: 1
-  serializedVersion: 2
-  m_Radius: 0.5
-  m_Center: {x: 0, y: 0, z: 0}

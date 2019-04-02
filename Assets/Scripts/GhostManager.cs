@@ -10,7 +10,7 @@ public class GhostManager : Photon.PunBehaviour
     #region Public Variables
 
     public float moveSpeed = 2.0f;
-    public float rotationSpeed = 3;
+    public float rotationSpeed = 2f;
 
     #endregion
 
@@ -21,7 +21,11 @@ public class GhostManager : Photon.PunBehaviour
     private bool isRotatingToStartingNode = false;
     private bool isOriented = false;
     private Vector3 currentDirection;    
-    private Node nodeInFront, northEast, northWest, southEast, southWest;
+    private Node nodeInFront, north, south, east, west;
+    private bool noWallNorth = false;
+    private bool noWallSouth = false;
+    private bool noWallEast = false;
+    private bool noWallWest = false;
     private float rotation = 0.0f;
     private GameObject pelletBeingDestroyed;
     List<Node> path;
@@ -40,8 +44,6 @@ public class GhostManager : Photon.PunBehaviour
     // Update is called once per frame
     void Update()
     {
-        Debug.Log("In Update()");
-
         foreach (GameObject player in GameObject.FindGameObjectsWithTag("Pacman"))
         {
             if (targetPlayer == null || Vector3.Distance(transform.position, player.transform.position) < Vector3.Distance(transform.position, player.transform.position))
@@ -52,17 +54,15 @@ public class GhostManager : Photon.PunBehaviour
 
         //Find shortest path to closest player
         path = aStar.GetPath(transform.position, targetPlayer.transform.position, Heuristic.EUCLIDIAN);
-
-        Debug.Log("AStar Path Length: " + path.Count);
-        Debug.Log("path[0] = " + path[0].Index + "\tpath[1] = " + path[1].Index);
                 
         //Find node in front of player
         RaycastHit hit;
         Vector3 nodePostion = new Vector3(this.gameObject.transform.position.x, 5.0f, this.gameObject.transform.position.z);
-        
+
+        GetComponent<Rigidbody>().MovePosition(transform.position + transform.forward * Time.deltaTime * moveSpeed);
+
         if (!isAligning && !isRotating && !isRotatingToStartingNode)
         {
-            Debug.Log("START MOVING THERE EH BUDDY");
             GetComponent<Rigidbody>().MovePosition(transform.position + transform.forward * Time.deltaTime * moveSpeed);
 
             if (Physics.Raycast(nodePostion, transform.forward, out hit, 1f))
@@ -71,11 +71,6 @@ public class GhostManager : Photon.PunBehaviour
                 if (hit.collider.gameObject.tag == "Node")
                 {
                     int index = Convert.ToInt32(hit.collider.gameObject.name.Substring(5));
-
-
-                    Debug.Log("The Raycast Hit Node " + index);
-
-
                     bool differentNode = false;
                     float distanceToNode = hit.distance;
                     if (nodeInFront == null || nodeInFront.Index != TileGenerator.Graph.Nodes[index].Index)
@@ -86,152 +81,247 @@ public class GhostManager : Photon.PunBehaviour
 
                     if (differentNode || distanceToNode < 0.5f)
                     {
-                        Debug.Log("START CASTING RAYZZZZZZ");
-
                         //Reset everything
-                        northEast = null;
-                        northWest = null;
-                        southEast = null;
-                        southWest = null;
+                        north = null;
+                        south = null;
+                        east = null;
+                        west = null;
+                        noWallNorth = false;
+                        noWallSouth = false;
+                        noWallEast = false;
+                        noWallWest = false;
 
-                        //Raycast northEast
-                        if (Physics.Raycast(nodeInFront.GameObject.transform.position, new Vector3(1, 0, 1), out hit, 1.5f))
+                        //Raycast north
+                        if (Physics.Raycast(nodeInFront.GameObject.transform.position, new Vector3(0, 0, 1), out hit, 1.5f))
                         {
                             if (hit.collider.gameObject.tag == "Node")
                             {
                                 index = Convert.ToInt32(hit.collider.gameObject.name.Substring(5));
-                                if (index == path[1].Index)
-                                {
-                                    northEast = path[1];
-                                }
-                            }
-                        }
-                        //Raycast northWest
-                        if (Physics.Raycast(nodeInFront.GameObject.transform.position, new Vector3(-1, 0, 1), out hit, 1.5f))
-                        {
-                            if (hit.collider.gameObject.tag == "Node")
-                            {
-                                index = Convert.ToInt32(hit.collider.gameObject.name.Substring(5));
-                                if (index == path[1].Index)
-                                {
-                                    northWest = path[1];
-                                }
-                            }
-                        }
-                        //Raycast southEast
-                        if (Physics.Raycast(nodeInFront.GameObject.transform.position, new Vector3(1, 0, -1), out hit, 1.5f))
-                        {
-                            if (hit.collider.gameObject.tag == "Node")
-                            {
-                                index = Convert.ToInt32(hit.collider.gameObject.name.Substring(5));
-                                if (index == path[1].Index)
-                                {
-                                    southEast = path[1];
-                                }
-                            }
-                        }
-                        //Raycast southWest
-                        if (Physics.Raycast(nodeInFront.GameObject.transform.position, new Vector3(-1, 0, -1), out hit, 1.5f))
-                        {
-                            if (hit.collider.gameObject.tag == "Node")
-                            {
-                                index = Convert.ToInt32(hit.collider.gameObject.name.Substring(5));
-                                if (index == path[1].Index)
-                                {
-                                    southWest = path[1];
-                                }
-                            }
-                        }
 
-                        if (northEast == null) Debug.Log("northEast: " + northEast); else Debug.Log("northEast: " + northEast.Index);
-                        if (northWest == null) Debug.Log("northWest: " + northWest); else Debug.Log("northWest: " + northWest.Index);
-                        if (southEast == null) Debug.Log("southEast: " + southEast); else Debug.Log("southEast: " + southEast.Index);
-                        if (southWest == null) Debug.Log("southWest: " + southWest); else Debug.Log("southWest: " + southWest.Index);
+                                if (index == path[0].Index)
+                                {
+                                    north = path[0];
+                                }
+
+                                noWallNorth = true;
+                            }
+                        }
+                        //Raycast south
+                        if (Physics.Raycast(nodeInFront.GameObject.transform.position, new Vector3(0, 0, -1), out hit, 1.5f))
+                        {
+                            if (hit.collider.gameObject.tag == "Node")
+                            {
+                                index = Convert.ToInt32(hit.collider.gameObject.name.Substring(5));
+
+                                if (index == path[0].Index)
+                                {
+                                    south = path[0];
+                                }
+
+                                noWallSouth = true;
+                            }
+                        }
+                        //Raycast east
+                        if (Physics.Raycast(nodeInFront.GameObject.transform.position, new Vector3(1, 0, 0), out hit, 1.5f))
+                        {
+                            if (hit.collider.gameObject.tag == "Node")
+                            {
+                                index = Convert.ToInt32(hit.collider.gameObject.name.Substring(5));
+
+                                if (index == path[0].Index)
+                                {
+                                    east = path[0];
+                                }
+
+                                noWallEast = true;
+                            }
+                        }
+                        //Raycast west
+                        if (Physics.Raycast(nodeInFront.GameObject.transform.position, new Vector3(-1, 0, 0), out hit, 1.5f))
+                        {
+                            if (hit.collider.gameObject.tag == "Node")
+                            {
+                                index = Convert.ToInt32(hit.collider.gameObject.name.Substring(5));
+
+                                if (index == path[0].Index)
+                                {
+                                    west = path[0];
+                                }
+
+                                noWallWest = true;
+                            }
+                        }
 
                         //User facing south
                         if (transform.forward.z < -0.98 && transform.forward.z > -1.02)
                         {
-                            Debug.Log("HEADING OUT WEST BABY");
-
                             //Check if next turn is west
-                            if (southWest != null)
+                            if (west != null)
                             {
                                 rotation = 90;
-                                rotationSpeed = 5;
+                                rotationSpeed = 1;
                                 currentDirection = transform.forward;
                                 isRotating = true;
+                                Debug.Log("HEADING SOUTH, TURN WEST");
                             }
                             //Check if next turn is east
-                            else if (southEast != null)
+                            else if (east != null)
                             {
                                 rotation = -90;
-                                rotationSpeed = 5;
+                                rotationSpeed = 1;
                                 currentDirection = transform.forward;
                                 isRotating = true;
-                            }
-
-                            
+                                Debug.Log("HEADING SOUTH, TURN EAST");
+                            }                            
                         }
                         //User facing north
                         else if (transform.forward.z > 0.98 && transform.forward.z < 1.02)
                         {
                             //Check if next turn is west
-                            if (northWest != null)
+                            if (west != null)
                             {
                                 rotation = -90;
-                                rotationSpeed = 5;
+                                rotationSpeed = 1;
                                 currentDirection = transform.forward;
                                 isRotating = true;
+                                Debug.Log("HEADING NORTH, TURN WEST");
                             }
                             //Check if next turn is east
-                            else if (northEast != null)
+                            else if (east != null)
                             {
                                 rotation = 90;
-                                rotationSpeed = 5;
+                                rotationSpeed = 1;
                                 currentDirection = transform.forward;
                                 isRotating = true;
+                                Debug.Log("HEADING NORTH, TURN EAST");
                             }
                         }
                         //User facing west
                         else if (transform.forward.x < -0.98 && transform.forward.x > -1.02)
                         {
                             //Check if next turn is north
-                            if (northWest != null)
+                            if (north != null)
                             {
                                 rotation = 90;
-                                rotationSpeed = 5;
+                                rotationSpeed = 1;
                                 currentDirection = transform.forward;
                                 isRotating = true;
+                                Debug.Log("HEADING WEST, TURN NORTH");
                             }
                             //Check if next turn is south
-                            else if (southWest != null)
+                            else if (south != null)
                             {
                                 rotation = -90;
-                                rotationSpeed = 5;
+                                rotationSpeed = 1;
                                 currentDirection = transform.forward;
                                 isRotating = true;
+                                Debug.Log("HEADING WEST, TURN SOUTH");
                             }
                         }
                         //User facing east
                         else if (transform.forward.x > 0.98 && transform.forward.x < 1.02)
                         {
                             //Check if next turn is north
-                            if (northEast != null)
+                            if (north != null)
                             {
                                 rotation = -90;
-                                rotationSpeed = 5;
+                                rotationSpeed = 1;
                                 currentDirection = transform.forward;
                                 isRotating = true;
+                                Debug.Log("HEADING EAST, TURN NORTH");
                             }
                             //Check if next turn is south
-                            else if (southEast != null)
+                            else if (south != null)
                             {
                                 rotation = 90;
-                                rotationSpeed = 5;
+                                rotationSpeed = 1;
                                 currentDirection = transform.forward;
                                 isRotating = true;
+                                Debug.Log("HEADING EAST, TURN SOUTH");
                             }
                         }
+                    }
+                }
+                //Wall ahead
+                else if (hit.collider.gameObject.tag == "Wall")
+                {
+                    //User facing south
+                    if (transform.forward.z < -0.98 && transform.forward.z > -1.02)
+                    {
+                        //Turn automatically (west by default)
+                        if (noWallWest)
+                        {
+                            rotation = 90;
+                            rotationSpeed = 5;
+                        }
+                        //Turn right automatically if can't turn left
+                        else if (noWallEast)
+                        {
+                            rotation = -90;
+                            rotationSpeed = 5;
+                        }
+
+                        currentDirection = transform.forward;
+                        isRotating = true;
+                    }
+                    //User facing north
+                    else if (transform.forward.z > 0.98 && transform.forward.z < 1.02)
+                    {
+                        Debug.Log("ABOUT TO HIT A WALL FACING NORTH");
+
+                        //Turn automatically (west by default)
+                        if (noWallWest)
+                        {
+                            rotation = -90;
+                            rotationSpeed = 5;
+                        }
+                        //Turn right automatically if can't turn east
+                        else if (noWallEast)
+                        {
+                            rotation = 90;
+                            rotationSpeed = 5;
+                        }
+
+                        currentDirection = transform.forward;
+                        isRotating = true;
+                    }
+                    //User facing west
+                    else if (transform.forward.x < -0.98 && transform.forward.x > -1.02)
+                    {                        
+                        //Turn automatically (left by default)
+                        if (noWallNorth)
+                        {
+                            rotation = 90;
+                            rotationSpeed = 5;
+                        }
+                        //Turn right automatically if can't turn left
+                        else if (noWallSouth)
+                        {
+                            rotation = -90;
+                            rotationSpeed = 5;
+                        }
+
+                        currentDirection = transform.forward;
+                        isRotating = true;
+                    }
+                    //User facing east
+                    else if (transform.forward.x > 0.98 && transform.forward.x < 1.02)
+                    {                        
+                        //Turn automatically (north by default)
+                        if (noWallNorth)
+                        {
+                            rotation = -90;
+                            rotationSpeed = 5;
+                        }
+                        //Turn south automatically if can't turn north
+                        else if (noWallSouth)
+                        {
+                            rotation = 90;
+                            rotationSpeed = 5;
+                        }
+
+                        currentDirection = transform.forward;
+                        isRotating = true;
                     }
                 }
             }
@@ -257,52 +347,7 @@ public class GhostManager : Photon.PunBehaviour
             }
         }
     }
-
-    private bool followAStarPath()
-    {
-        /*if (path.Count > 0 && path[0] != null && currentNode != path[0])
-        {
-            currentNode = path[0];
-        }
-
-        //This is ugly.... but it works...
-        GameObject tempGameObject = new GameObject();
-        Transform tempTransform = tempGameObject.transform;
-        tempTransform.position = transform.position;
-        tempTransform.rotation = transform.rotation;
-        tempTransform.LookAt(currentNode.GameObject.transform.position);
-        Quaternion endRotation = tempTransform.rotation;
-
-        transform.rotation = Quaternion.Lerp(transform.rotation, endRotation, rotationSpeed * Time.deltaTime);
-        transform.position += transform.forward * speed * Time.deltaTime;
-
-        if (path.Count == 1 && Vector3.Distance(transform.position, path[path.Count - 1].GameObject.transform.position) < 0.5f)
-        {
-            hasArrived = true;
-            return true;
-        }*/
-
-        return false;
-    }
-
-    private void rotateToStartingNode(Node node)
-    {
-        Vector3 targetDir = node.GameObject.transform.position - transform.position;
-
-        Vector3 newDir = Vector3.RotateTowards(transform.forward, targetDir, rotationSpeed * Time.deltaTime, 0.0f);
-        //Debug.DrawRay(transform.position, newDir, Color.red);
-
-        // Move our position a step closer to the target.
-        transform.rotation = Quaternion.LookRotation(newDir);
-
-        if (Vector3.Angle(node.GameObject.transform.position, transform.forward) < 0.01f)
-        {
-            isRotatingToStartingNode = false;
-            isAligning = true;
-            alignPlayer();
-        }
-    }
-
+    
     private void rotatePlayer(float rotation, float speed)
     {
         Quaternion deltaRotation = Quaternion.Euler(new Vector3(0, rotation, 0) * Time.deltaTime * speed);
@@ -368,7 +413,7 @@ public class GhostManager : Photon.PunBehaviour
             z = (int)z + 0.5f;
         }
 
-        float step = 3.0f * Time.deltaTime; // calculate distance to move
+        float step = 2.0f * Time.deltaTime; // calculate distance to move
         transform.position = Vector3.MoveTowards(transform.position, new Vector3(x, 0.5f, z), step);
 
         // Check if the position of the cube and sphere are approximately equal.
@@ -382,6 +427,9 @@ public class GhostManager : Photon.PunBehaviour
 
     void OnTriggerEnter(Collider other)
     {
-        Physics.IgnoreCollision(other, GetComponent<Collider>());
-    }
+        if (other.gameObject.tag != "Pacman")
+        {
+            Physics.IgnoreCollision(other, GetComponent<Collider>());
+        }            
+    }       
 }

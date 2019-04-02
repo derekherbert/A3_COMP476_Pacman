@@ -66,7 +66,7 @@ namespace Assets.Scripts
             if (PhotonNetwork.isMasterClient)
             {
                 PhotonView ghost1PhotonView = PhotonNetwork.Instantiate("Ghost", new Vector3(0.5f, 1f, 0.5f), Quaternion.Euler(new Vector3(0, -90, 0)), 0).GetPhotonView();
-                //PhotonView ghost2PhotonView = PhotonNetwork.Instantiate("Ghost", new Vector3(1.5f, 1f, 0.5f), Quaternion.Euler(new Vector3(0, 90, 0)), 0).GetPhotonView();
+                PhotonView ghost2PhotonView = PhotonNetwork.Instantiate("Ghost", new Vector3(1.5f, 1f, 0.5f), Quaternion.Euler(new Vector3(0, 90, 0)), 0).GetPhotonView();
             }
 
             //Only instantiate a player if there is no local reference already

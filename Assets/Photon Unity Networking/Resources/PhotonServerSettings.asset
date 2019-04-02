@@ -52,4 +52,5 @@ MonoBehaviour:
   - FinishedPowerMode
   - InPowerMode
   - KickPlayer
+  - EatenByGhost
   DisableAutoOpenWizard: 1

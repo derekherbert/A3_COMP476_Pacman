@@ -78,22 +78,6 @@ namespace Assets.Scripts
 
             if (photonView.isMine)
             {
-                //Check preemptively for collision with another entity
-                RaycastHit hit;
-                if (Physics.Raycast(new Vector3(transform.position.x, 0.85f, transform.position.z), transform.forward, out hit, 1.7f))
-                {
-                    if (hit.collider.tag == "Pacman")
-                    {
-                        recentlyCollided = true;
-                        recentlyCollidedCtr = 0;
-
-                        Quaternion rotation = Quaternion.Euler(new Vector3(0, GetComponent<Rigidbody>().rotation.eulerAngles.y - 180f, 0));
-                        GetComponent<Rigidbody>().rotation = rotation;
-
-                        GetComponent<Rigidbody>().MovePosition(transform.position + transform.forward * Time.deltaTime * 5);
-                    }
-                }
-
                 //Check for power mode
                 if (inPowerMode)
                 {
@@ -120,7 +104,7 @@ namespace Assets.Scripts
 
         public static void NewPlayerSpawn(string playerName, int actorID, int playerViewID)
         {
-            LocalPlayerInstance.RPC("NewPlayerSpawnRPC", PhotonTargets.All, playerName, actorID, playerViewID);
+            //LocalPlayerInstance.RPC("NewPlayerSpawnRPC", PhotonTargets.All, playerName, actorID, playerViewID);
         }            
 
         [PunRPC]
@@ -225,7 +209,7 @@ namespace Assets.Scripts
                 PhotonNetwork.CloseConnection(PhotonPlayer.Find(playerID));
             }            
         }
-
+        
         /// <summary>
         /// MonoBehaviour method called when the Collider 'other' enters the trigger.
         /// If it is another player, both should bounce back
@@ -237,27 +221,43 @@ namespace Assets.Scripts
             {
                 return;
             }
-                        
-            //Pacman collision: Both players bounce back and rotate towards where they were coming from
+
             if (other.gameObject.tag == "Pacman")
             {
-                recentlyCollided = true;
-                recentlyCollidedCtr = 0;
-                                
-                Quaternion rotation = Quaternion.Euler(new Vector3(0, - GetComponent<Rigidbody>().rotation.eulerAngles.y, 0));
-                GetComponent<Rigidbody>().rotation = rotation;
-                                     
-                GetComponent<Rigidbody>().MovePosition(transform.position + transform.forward  * Time.deltaTime * 4);
-
-                isAligning = true;
-                alignPlayer();
-
                 if (inPowerMode)
                 {
-                    photonView.RPC("KickPlayer", PhotonTargets.MasterClient, other.GetComponent<PhotonView>().owner.ID);
+                    photonView.RPC("KickPlayer", PhotonTargets.MasterClient, other.gameObject.GetComponent<PhotonView>().owner.ID);
+                    isAligning = true;
+                    alignPlayer();
+                }
+                else
+                {
+                    recentlyCollided = true;
+                    recentlyCollidedCtr = 0;
+
+                    Quaternion rotation = Quaternion.Euler(new Vector3(0, GetComponent<Rigidbody>().rotation.eulerAngles.y - 180f, 0));
+                    GetComponent<Rigidbody>().rotation = rotation;
+
+                    GetComponent<Rigidbody>().MovePosition(transform.position + transform.forward * Time.deltaTime * 5);
                 }
             }
+            else if (other.gameObject.tag == "Ghost")
+            {
+                if (inPowerMode)
+                {
+                    other.gameObject.transform.position = new Vector3(0.5f, 0, 0.5f);
+                    isAligning = true;
+                    alignPlayer();
+                }
+                else
+                {
+                    this.gameObject.transform.position = GameManager.startingPositions[playerNumber];
+                    this.gameObject.transform.rotation = Quaternion.Euler(GameManager.startingRotations[playerNumber]);
 
+                    PhotonNetwork.player.AddScore(-25);
+                    inPowerMode = false;
+                }
+            }
             else if (other.gameObject.tag == "Fruit")
             {                
                 photonView.RPC("FruitEaten", PhotonTargets.MasterClient, other.GetComponent<PhotonView>().viewID);
@@ -275,15 +275,15 @@ namespace Assets.Scripts
             else if (other.gameObject.tag == "PowerPellet")
             {
                 photonView.RPC("PowerPelletEaten", PhotonTargets.MasterClient, other.GetComponent<PhotonView>().viewID);
+                
+                //Destroy all previous powerPellets
+                foreach (GameObject powerPellet in GameObject.FindGameObjectsWithTag("PowerPellet"))
+                {
+                    PhotonNetwork.Destroy(powerPellet.GetComponent<PhotonView>());
+                }
 
                 //Power mode
                 inPowerMode = true;
-            }
-
-            //Ghost collision: Player is kicked from the game. 
-            else if (other.gameObject.tag == "Ghost")
-            {
-                GameManager.Instance.LeaveRoom();
             }
 
             //Pellet collision: Pellet removed from map, player score increases
